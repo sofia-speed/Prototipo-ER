@@ -12,9 +12,11 @@ window.onload = function () {
 };
 
 function carregarStorage() {
-    var dados = localStorage.getItem('ncs');
-    if (dados) {
-        ncs = JSON.parse(dados);
+    var dados_ncs = localStorage.getItem('ncs');
+    var dados_acs = localStorage.getItem('acs');
+    if (dados_ncs) {  //so verificamos ncs porque sem ncs nao podem haver acs
+        ncs = JSON.parse(dados_ncs);
+        acs = JSON.parse(dados_acs)
         var cont = localStorage.getItem('contador');
         if (cont) contador = parseInt(cont);
     } else {
@@ -51,7 +53,9 @@ function carregarStorage() {
                 descricao: 'Comunicar com o fornecedor',
                 responsavel: 'João Silva',
                 estado: 'em execução',
-                prazo: '2026-03-02'
+                prazo: '2026-03-02',
+                eficacia_auditada: 'false',
+                comentario_auditoria: null
             }
         ]
         contador = 3; //id da nc seguinte seria 0003
@@ -61,6 +65,7 @@ function carregarStorage() {
 
 function guardarStorage() {
     localStorage.setItem('ncs', JSON.stringify(ncs));
+    localStorage.setItem('acs', JSON.stringify(acs));
     localStorage.setItem('contador', contador);
 }
 
