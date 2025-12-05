@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAMQ-9001 - Não Conformidades</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="../css/global.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">SAMQ-9001</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="">Não Conformidades</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="">Ações Corretivas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="">Indicadores</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="">Oportunidades</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="bi bi-person-circle"></i> Utilizador</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-exclamation-triangle"></i> Gestão de Não Conformidades</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNovaNC">
+                <i class="bi bi-plus-circle"></i> Nova Não Conformidade
+            </button>
+        </div>
+
+        <!-- Filtros -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Estado</label>
+                        <select class="form-select" id="filtroEstado">
+                            <option value="">Todos</option>
+                            <option value="aberta">Aberta</option>
+                            <option value="analise">Em Análise</option>
+                            <option value="encerrada">Encerrada</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Pesquisar</label>
+                        <input type="text" class="form-control" id="filtroPesquisa" placeholder="Pesquisar...">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Não Conformidades -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Título</th>
+                                <th>Área</th>
+                                <th>Responsável</th>
+                                <th>Data</th>
+                                <th>Estado</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaNCs">
+                            <!-- Dados enviados pelo JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nova Não Conformidade -->
+    <div class="modal fade" id="modalNovaNC">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nova Não Conformidade</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formNovaNC">
+                        <div class="mb-3">
+                            <label class="form-label">Título *</label>
+                            <input type="text" class="form-control" id="ncTitulo" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descrição *</label>
+                            <textarea class="form-control" id="ncDescricao" rows="4" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Área Afetada *</label>
+                                <select class="form-select" id="ncArea" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="Produção">Produção</option>
+                                    <option value="Qualidade">Qualidade</option>
+                                    <option value="Logística">Logística</option>
+                                    <option value="Comercial">Comercial</option>
+                                    <option value="RH">Recursos Humanos</option>
+                                    <option value="TI">Tecnologia</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Responsável *</label>
+                                <select class="form-select" id="ncResponsavel" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="João Silva">João Silva</option>
+                                    <option value="Maria Santos">Maria Santos</option>
+                                    <option value="Pedro Costa">Pedro Costa</option>
+                                    <option value="Ana Pereira">Ana Pereira</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Prioridade *</label>
+                                <select class="form-select" id="ncPrioridade" required>
+                                    <option value="Baixa">Baixa</option>
+                                    <option value="Média" selected>Média</option>
+                                    <option value="Alta">Alta</option>
+                                    <option value="Crítica">Crítica</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Data de Deteção *</label>
+                                <input type="date" class="form-control" id="ncData" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnGuardarNC">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detalhes da Não Conformidade -->
+    <div class="modal fade" id="modalDetalhesNC">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalhes da Não Conformidade</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>ID:</strong> <span id="detalheId"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Data:</strong> <span id="detalheData"></span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Título:</strong>
+                        <p id="detalheTitulo"></p>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Descrição:</strong>
+                        <p id="detalheDescricao"></p>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong>Área:</strong> <span id="detalheArea"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Responsável:</strong> <span id="detalheResponsavel"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Prioridade:</strong> <span id="detalhePrioridade"></span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Alterar Estado:</strong></label>
+                        <select class="form-select" id="detalheEstado">
+                            <option value="aberta">Aberta</option>
+                            <option value="analise">Em Análise</option>
+                            <option value="encerrada">Encerrada</option>
+                        </select>
+                    </div>
+                    <hr>
+                    <h6>Histórico de Estados</h6>
+                    <ul id="detalheHistorico" class="list-group">
+                        <!-- Histórico colocado pelo JavaScript -->
+                    </ul>
+                    <hr>
+                    <h6>Ações Corretivas Associadas</h6>
+                    <div id="detalheAcoes">
+                        <p class="text-muted">Nenhuma ação corretiva associada.</p>
+                    </div>
+                    <button class="btn btn-sm btn-success mt-2">
+                        <i class="bi bi-plus"></i> Criar Ação Corretiva
+                    </button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" id="btnAtualizarEstado">Atualizar Estado</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/nc.js"></script>
+</body>
+</html>
