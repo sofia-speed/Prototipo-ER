@@ -49,7 +49,7 @@ function carregarStorage() {
         guardarStorage();
     }
     if (dados_acs) {  
-        ncs = JSON.parse(dados_acs);
+        acs = JSON.parse(dados_acs);
         var cont = localStorage.getItem('contadorAC');
         if (cont) contadorAC = parseInt(cont);
     } else {
