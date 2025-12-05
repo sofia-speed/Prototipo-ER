@@ -212,7 +212,22 @@
                     <hr>
                     <h6>Ações Corretivas Associadas</h6>
                     <div id="detalheAcoes">
-                        <p class="text-muted">Nenhuma ação corretiva associada.</p>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Descrição</th>
+                                        <th>Responsável</th>
+                                        <th>Prazo</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelaAcoes">
+                                   <!--acoes inseridas por js-->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                     <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalNovaAC">Criar Ação Corretiva</button>
                 </div>

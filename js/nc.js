@@ -225,6 +225,35 @@ function verDetalhes(index) {
     document.getElementById('detalheHistorico').innerHTML = historico;
     document.getElementById('ac_ncId').value = nc.id;
 
+    //mostrar as Ações Corretivas associadas à NC
+        var tabelaAcoes = document.getElementById('tabelaAcoes');
+        tabelaAcoes.innerHTML = ''; // Limpar a tabela
+
+        var acs_associadas = [];
+        for(var i = 0; i < acs.length; i++){
+            if(acs[i].ncId == nc.id) acs_associadas.push(acs[i]);
+        }
+
+        if(acs_associadas.length > 0){
+            for(var i = 0; i < acs_associadas.length; i++){
+                var ac = acs_associadas[i];
+                var tr = document.createElement('tr');
+                
+                var textoEstado = ac.estado == 'pendente' ? 'Pendente' : ac.estado == 'em_progresso' ? 'Em Progresso' : 'Concluída';
+                
+                tr.innerHTML = '<td><strong>' + ac.id + '</strong></td>' +
+                    '<td>' + ac.descricao + '</td>' +
+                    '<td>' + ac.responsavel + '</td>' +
+                    '<td>' + ac.prazo.split('-').reverse().join('/') + '</td>' +
+                    '<td>'+ textoEstado + '</span></td>';
+                
+                tabelaAcoes.appendChild(tr);
+            }
+        } else {
+            // Se não houver ações, mostrar mensagem
+            tabelaAcoes.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Nenhuma ação corretiva associada.</td></tr>';
+        }
+
     new bootstrap.Modal(document.getElementById('modalDetalhesNC')).show();
 }
 
