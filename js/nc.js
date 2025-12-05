@@ -94,16 +94,12 @@ function mostrarNCs() {
         if (filtroPesquisa && !nc.titulo.toLowerCase().includes(filtroPesquisa)) continue; //verificar se titulo da nc corresponde a pesquisa
 
         var tr = document.createElement('tr'); //cria uma linha na tabela
-        var corEstado;
         var textoEstado;
         if (nc.estado == 'aberta') {
-            corEstado = 'danger'; //vermelho
             textoEstado = 'Aberta';
         } else if (nc.estado == 'analise') {
-            corEstado = 'warning'; //amarelo
             textoEstado = 'Em Análise';
         } else {
-            corEstado = 'success'; //verde
             textoEstado = 'Encerrada'
         }
 
@@ -112,7 +108,7 @@ function mostrarNCs() {
             '<td>' + nc.area + '</td>' +
             '<td>' + nc.responsavel + '</td>' +
             '<td>' + nc.data.split('-').reverse().join('/') + '</td>' +
-            '<td><span class="badge bg-' + corEstado + '">' + textoEstado + '</span></td>' +
+            '<td><span>' + textoEstado + '</span></td>' +
             '<td><button class="btn btn-sm btn-primary" onclick="verDetalhes(' + i + ')"><i class="bi bi-eye"></i></button></td>';
         tbody.appendChild(tr);
 
