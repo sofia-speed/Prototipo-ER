@@ -3,6 +3,7 @@
 var ncs = []; //array das nao conformidades
 var acs =[]; //array das acoes corretivas
 var contador = 1; //serve para criar os ids das nc
+var contadorAC = 1;
 var ncSelecionada = null; //nc selecionada ao  ver detalhes
 
 window.onload = function () {
@@ -14,9 +15,8 @@ window.onload = function () {
 function carregarStorage() {
     var dados_ncs = localStorage.getItem('ncs');
     var dados_acs = localStorage.getItem('acs');
-    if (dados_ncs) {  //so verificamos ncs porque sem ncs nao podem haver acs
+    if (dados_ncs) { 
         ncs = JSON.parse(dados_ncs);
-        acs = JSON.parse(dados_acs)
         var cont = localStorage.getItem('contador');
         if (cont) contador = parseInt(cont);
     } else {
@@ -45,7 +45,15 @@ function carregarStorage() {
                 historico: ['aberta em 03/12/2024']
             }
         ];
-
+        contador = 3; //id da nc seguinte seria 0003
+        guardarStorage();
+    }
+    if (dados_acs) {  
+        ncs = JSON.parse(dados_acs);
+        var cont = localStorage.getItem('contadorAC');
+        if (cont) contadorAC = parseInt(cont);
+    } else {
+        // dados exemplo
         acs =[
             {
                 id: 'AC0001',
@@ -58,7 +66,7 @@ function carregarStorage() {
                 comentario_auditoria: null
             }
         ]
-        contador = 3; //id da nc seguinte seria 0003
+        contadorAC = 2; 
         guardarStorage();
     }
 }
@@ -148,6 +156,55 @@ document.getElementById('btnGuardarNC').onclick = function () {
     bootstrap.Modal.getInstance(document.getElementById('modalNovaNC')).hide();
 };
 
+document.getElementById('btnGuardarAC').onclick = function () {
+    
+    var ncId = document.getElementById('ac_ncId').value;           
+    var descricao = document.getElementById('ac_descricao').value;    
+    var responsavel = document.getElementById('ac_responsavel').value;  
+    var prazo = document.getElementById('ac_prazo').value;        
+    var estado = document.getElementById('ac_estado').value;         
+    var eficaciaAuditada = document.getElementById('ac_eficacia').value; 
+    var comentarioAuditoria = document.getElementById('ac_comentario_auditoria').value; 
+
+
+    if (!ncId || !descricao || !responsavel || !prazo) {
+        alert('Preencha os campos obrigatórios (Descrição, Responsável, Prazo e NC de Origem).');
+        return;
+    }
+
+  
+    if (typeof contadorAC === 'undefined') { var contadorAC = 1; } // Apenas para simulação
+    var id = 'AC' + ('000' + contadorAC).slice(-4); 
+
+
+    var novaAC = {
+        id: id,
+        ncId: ncId,
+        descricao: descricao,
+        responsavel: responsavel,
+        data_inicio: new Date().toLocaleDateString('pt-PT'), // Data de início automática
+        prazo: prazo,
+        estado: estado,
+        eficacia_auditada: eficaciaAuditada,
+        comentario_auditoria: comentarioAuditoria || null // Guarda null se estiver vazio
+    };
+
+    acs.push(novaAC);
+    contadorAC++;
+
+    guardarStorage(); 
+
+    //Limpar o formulário e fechar o modal
+    document.getElementById('formNovaAC').reset();
+    
+    // Fecha o modal 
+    var modal = document.getElementById('modalNovaAC');
+    var bootstrapModal = bootstrap.Modal.getInstance(modal)
+    bootstrapModal.hide();
+    
+    alert('Ação Corretiva ' + id + ' criada com sucesso e ligada à NC ' + ncId + '!');
+};
+
 function verDetalhes(index) {
     ncSelecionada = index;
     var nc = ncs[index];
@@ -166,6 +223,7 @@ function verDetalhes(index) {
         historico += '<li class="list-group-item">' + nc.historico[i] + '</li>';
     }
     document.getElementById('detalheHistorico').innerHTML = historico;
+    document.getElementById('ac_ncId').value = nc.id;
 
     new bootstrap.Modal(document.getElementById('modalDetalhesNC')).show();
 }

@@ -229,13 +229,13 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalNovaACLabel">Nova Ação Corretiva (AC)</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form id="formNovaAC">
                     <div class="mb-3">
                         <label class="form-label">Ligada à Não Conformidade (NC ID)</label>
-                        <input type="text" class="form-control" id="ac_ncId" value="NC0001" readonly>
+                        <input type="text" class="form-control" id="ac_ncId" value=""> <!--value colocado com js-->
                     </div>
 
                     <div class="mb-3">
@@ -286,7 +286,6 @@
                         <textarea class="form-control" id="ac_comentario_auditoria" rows="2"></textarea>
                     </div>
 
-                    <input type="hidden" id="ac_id" value="AC0001">
 
                 </form>
             </div>
