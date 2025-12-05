@@ -1,6 +1,7 @@
 
 
-var ncs = []; //array das nc
+var ncs = []; //array das nao conformidades
+var acs =[]; //array das acoes corretivas
 var contador = 1; //serve para criar os ids das nc
 var ncSelecionada = null; //nc selecionada ao  ver detalhes
 
@@ -42,6 +43,17 @@ function carregarStorage() {
                 historico: ['aberta em 03/12/2024']
             }
         ];
+
+        acs =[
+            {
+                id: 'AC0001',
+                ncId: 'NC0001',
+                descricao: 'Comunicar com o fornecedor',
+                responsavel: 'João Silva',
+                estado: 'em execução',
+                prazo: '2026-03-02'
+            }
+        ]
         contador = 3; //id da nc seguinte seria 0003
         guardarStorage();
     }
@@ -154,6 +166,8 @@ function verDetalhes(index) {
 }
 
 document.getElementById('btnAtualizarEstado').onclick = function () {
+    var modal = document.getElementById("modalDetalhesNC");
+    var bootstrapModal = bootstrap.Modal.getInstance(modal);
     if (ncSelecionada == null) return;
 
     var novoEstado = document.getElementById("detalheEstado").value;
@@ -174,7 +188,7 @@ document.getElementById('btnAtualizarEstado').onclick = function () {
 
     guardarStorage();
     mostrarNCs();
-    verDetalhes(ncSelecionada);
+    bootstrapModal.hide(); //fecha o modal depois da atualização
     alert('O estado da não conformidade foi atualizado com sucesso');
 };
 
