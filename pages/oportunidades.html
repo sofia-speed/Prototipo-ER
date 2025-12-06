@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAMQ-9001 - Oportunidades</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="../css/global.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">SAMQ-9001</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="nao-conformidades.html">Não Conformidades</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Ações Corretivas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Indicadores</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="oportunidades.html">Oportunidades</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="bi bi-person-circle"></i> Utilizador</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Gestão de Oportunidades</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNovaOM">Nova Oportunidade</button>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Estado</label>
+                        <select class="form-select" id="filtroEstado">
+                            <option value="">Todos</option>
+                            <option value="proposta">Proposta</option>
+                            <option value="avaliacao">Em Avaliação</option>
+                            <option value="implementacao">Em Implementação</option>
+                            <option value="concluida">Concluída</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Pesquisar</label>
+                        <input type="text" class="form-control" id="filtroPesquisa" placeholder="Pesquisar por título...">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Título</th>
+                                <th>Área</th>
+                                <th>Prioridade</th>
+                                <th>Data</th>
+                                <th>Estado</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaOMs">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalNovaOM">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nova Oportunidade de Melhoria</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formNovaOM">
+                        <div class="mb-3">
+                            <label class="form-label">Título *</label>
+                            <input type="text" class="form-control" id="omTitulo" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descrição Detalhada *</label>
+                            <textarea class="form-control" id="omDescricao" rows="4" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Área *</label>
+                                <select class="form-select" id="omArea" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="Produção">Produção</option>
+                                    <option value="Qualidade">Qualidade</option>
+                                    <option value="Logística">Logística</option>
+                                    <option value="Comercial">Comercial</option>
+                                    <option value="RH">Recursos Humanos</option>
+                                    <option value="TI">Tecnologia</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Prioridade *</label>
+                                <select class="form-select" id="omPrioridade" required>
+                                    <option value="Baixa">Baixa</option>
+                                    <option value="Média" selected>Média</option>
+                                    <option value="Alta">Alta</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Dificuldade Estimada</label>
+                                <select class="form-select" id="omDificuldade">
+                                    <option value="Fácil">Fácil</option>
+                                    <option value="Média" selected>Média</option>
+                                    <option value="Difícil">Difícil</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Impacto Estimado</label>
+                                <select class="form-select" id="omImpacto">
+                                    <option value="Baixo">Baixo</option>
+                                    <option value="Médio" selected>Médio</option>
+                                    <option value="Alto">Alto</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Data e Hora de Registo *</label>
+                            <input type="datetime-local" class="form-control" id="omData" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnGuardarOM">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalDetalhesOM">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalhes da Oportunidade</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>ID:</strong> <span id="detalheId"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Data:</strong> <span id="detalheData"></span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Título:</strong>
+                        <p id="detalheTitulo"></p>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Descrição:</strong>
+                        <p id="detalheDescricao"></p>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <strong>Área:</strong> <br><span id="detalheArea"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Prioridade:</strong> <br><span id="detalhePrioridade"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Dificuldade:</strong> <br><span id="detalheDificuldade"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Impacto:</strong> <br><span id="detalheImpacto"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Alterar Estado:</strong></label>
+                        <select class="form-select" id="detalheEstado">
+                            <option value="proposta">Proposta</option>
+                            <option value="avaliacao">Em Avaliação</option>
+                            <option value="implementacao">Em Implementação</option>
+                            <option value="concluida">Concluída</option>
+                        </select>
+                    </div>
+
+                    <hr>
+                    <h6><i class="bi bi-clock-history"></i> Histórico de Alterações</h6>
+                    <ul id="detalheHistorico" class="list-group">
+                        </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" id="btnAtualizarEstado">Atualizar Estado</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/om.js"></script>
+</body>
+</html>
