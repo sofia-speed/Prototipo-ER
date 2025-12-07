@@ -1,0 +1,153 @@
+// indicadores.js
+
+var indicadores = [];
+var contadorIND = 1;
+var indicadorSelecionado = null;
+
+window.onload = function () {
+    carregarStorage();
+    mostrarIndicadores();
+};
+
+function carregarStorage() {
+    var dados = localStorage.getItem('indicadores');
+    if (dados) {
+        indicadores = JSON.parse(dados);
+        var cont = localStorage.getItem('contadorIND');
+        if (cont) contadorIND = parseInt(cont);
+    } else {
+        // Exemplos iniciais
+        indicadores = [
+            {
+                id: 'IND0001',
+                nome: 'Número de Reclamações Mensais',
+                departamento: 'Qualidade',
+                meta: 'No máximo 3 reclamações por mês',
+                valor: 5, // Valor atual
+                historico: [
+                    'Indicador criado com valor inicial: 5 em 12/12/2024',
+                ]
+            },
+            {
+                id: 'IND0002',
+                nome: 'Tempo Médio de Resolução de NC',
+                departamento: 'Produção',
+                meta: 'Resolver NC em até 10 dias',
+                valor: 14,
+                historico: [
+                    'Indicador criado com valor inicial: 14 em 05/12/2024',
+                ]
+            }
+        ];
+        contadorIND = 3;
+        guardarStorage();
+    }
+}
+
+function guardarStorage() {
+    localStorage.setItem('indicadores', JSON.stringify(indicadores));
+    localStorage.setItem('contadorIND', contadorIND);
+}
+
+function mostrarIndicadores() {
+
+    var tbody = document.getElementById("tabelaIndicadores");
+    tbody.innerHTML = '';
+
+    var filtroArea = document.getElementById("filtroArea").value;
+    var filtroPesquisa = document.getElementById("filtroPesquisa").value.toLowerCase();
+
+    for (var i = 0; i < indicadores.length; i++) {
+        var ind = indicadores[i];
+
+        if (filtroArea && ind.departamento != filtroArea) continue;
+        if (filtroPesquisa && !ind.nome.toLowerCase().includes(filtroPesquisa)) continue;
+
+        var tr = document.createElement('tr');
+
+        tr.innerHTML = '<td><strong>' + ind.id + '</strong></td>' +
+            '<td>' + ind.nome + '</td>' +
+            '<td>' + ind.departamento + '</td>' +
+            '<td>' + ind.meta + '</td>' +
+            '<td>' + ind.valor + '</td>' +
+            '<td><button class="btn btn-primary btn-sm" onclick="verDetalhes(' + i + ')"><i class="bi bi-eye"></i></button></td>';
+
+        tbody.appendChild(tr);
+    }
+}
+
+document.getElementById('btnGuardarIndicador').onclick = function () {
+    var nome = document.getElementById('indNome').value;
+    var dept = document.getElementById('indDepartamento').value;
+    var meta = document.getElementById('indMeta').value;
+    var valor = document.getElementById('indValor').value;
+
+    if (!nome || !dept || !meta || !valor) {
+        alert('Preencha todos os campos obrigatórios!');
+        return;
+    }
+
+    var id = 'IND' + ('000' + contadorIND).slice(-4);
+    var dataAgora = new Date().toLocaleDateString('pt-PT');
+
+    var novoIndicador = {
+        id: id,
+        nome: nome,
+        departamento: dept,
+        meta: meta,
+        valor: Number(valor),
+        historico: [
+            'Indicador criado com valor inicial: ' + valor + ' em ' + dataAgora
+        ]
+    };
+
+    indicadores.push(novoIndicador);
+    contadorIND++;
+    guardarStorage();
+    mostrarIndicadores();
+
+    document.getElementById('formNovoIndicador').reset();
+    bootstrap.Modal.getInstance(document.getElementById('modalNovoIndicador')).hide();
+};
+
+function verDetalhes(index) {
+    indicadorSelecionado = index;
+    var ind = indicadores[index];
+
+    document.getElementById('detalheId').textContent = ind.id;
+    document.getElementById('detalheNome').textContent = ind.nome;
+    document.getElementById('detalheDepartamento').textContent = ind.departamento;
+    document.getElementById('detalheMeta').textContent = ind.meta;
+    document.getElementById('detalheValor').textContent = ind.valor;
+
+    document.getElementById('novoValorAtual').value = '';
+
+    new bootstrap.Modal(document.getElementById('modalDetalhesIndicador')).show();
+}
+
+document.getElementById('btnAtualizarValor').onclick = function () {
+    if (indicadorSelecionado == null) return;
+
+    var novoValor = document.getElementById('novoValorAtual').value;
+    if (novoValor === "") {
+        alert("Insira um valor válido!");
+        return;
+    }
+
+    var ind = indicadores[indicadorSelecionado];
+    var valorAnterior = ind.valor;
+    ind.valor = Number(novoValor);
+
+    var dataAgora = new Date().toLocaleDateString('pt-PT') + ' ' + new Date().toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'});
+
+    ind.historico.push('Valor atualizado de ' + valorAnterior + ' para ' + novoValor + ' em ' + dataAgora);
+
+    guardarStorage();
+    mostrarIndicadores();
+
+    bootstrap.Modal.getInstance(document.getElementById('modalDetalhesIndicador')).hide();
+    alert('Valor atualizado com sucesso!');
+}
+
+document.getElementById('filtroArea').onchange = mostrarIndicadores;
+document.getElementById('filtroPesquisa').oninput = mostrarIndicadores;
