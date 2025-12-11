@@ -1,15 +1,14 @@
-
-
-var ncs = []; //array das nao conformidades
-var acs =[]; //array das acoes corretivas
-var contador = 1; //serve para criar os ids das nc
+var ncs = []; 
+var acs = []; 
+var contador = 1; 
 var contadorAC = 1;
-var ncSelecionada = null; //nc selecionada ao  ver detalhes
+var ncSelecionada = null; 
 
 window.onload = function () {
     carregarStorage();
     mostrarNCs();
     document.getElementById('ncData').valueAsDate = new Date();
+    carregarSelectUsuarios(['ncResponsavel', 'ac_responsavel']);
 };
 
 function carregarStorage() {
@@ -20,88 +19,44 @@ function carregarStorage() {
         var cont = localStorage.getItem('contador');
         if (cont) contador = parseInt(cont);
     } else {
-        // dados exemplo
-        ncs = [
-            {
-                id: 'NC0001',
-                titulo: 'Atraso na entrega de materiais',
-                descricao: 'Fornecedor não cumpriu prazo.',
-                area: 'Logística',
-                responsavel: 'João Silva',
-                prioridade: 'Alta',
-                data: '2024-12-01',
-                estado: 'analise',
-                historico: ['aberta em 01/12/2024', 'em análise em 02/12/2024']
-            },
-            {
-                id: 'NC0002',
-                titulo: 'Produto fora das especificações',
-                descricao: 'Lote com dimensões incorretas.',
-                area: 'Qualidade',
-                responsavel: 'Maria Santos',
-                prioridade: 'Crítica',
-                data: '2024-12-03',
-                estado: 'aberta',
-                historico: ['aberta em 03/12/2024']
-            }
-        ];
-        contador = 3; //id da nc seguinte seria 0003
-        guardarStorage();
+        ncs = [];
+        contador = 1; 
     }
     if (dados_acs) {  
         acs = JSON.parse(dados_acs);
-        var cont = localStorage.getItem('contadorAC');
-        if (cont) contadorAC = parseInt(cont);
+        var contAC = localStorage.getItem('contadorAC');
+        if (contAC) contadorAC = parseInt(contAC);
     } else {
-        // dados exemplo
-        acs =[
-            {
-                id: 'AC0001',
-                ncId: 'NC0001',
-                descricao: 'Comunicar com o fornecedor',
-                responsavel: 'João Silva',
-                estado: 'em execução',
-                prazo: '2026-03-02',
-                eficacia_auditada: 'false',
-                comentario_auditoria: null
-            }
-        ]
-        contadorAC = 2; 
-        guardarStorage();
+        acs =[];
+        contadorAC = 1; 
     }
+    guardarStorage();
 }
 
 function guardarStorage() {
     localStorage.setItem('ncs', JSON.stringify(ncs));
     localStorage.setItem('acs', JSON.stringify(acs));
     localStorage.setItem('contador', contador);
+    localStorage.setItem('contadorAC', contadorAC);
 }
 
 function mostrarNCs() {
-
-    console.log("mostrar ncs");
-
     var tbody = document.getElementById("tabelaNCs");
-    tbody.innerHTML = ''; //limpar a tabela
+    tbody.innerHTML = ''; 
 
     var filtroEstado = document.getElementById("filtroEstado").value;
     var filtroPesquisa = document.getElementById("filtroPesquisa").value.toLowerCase();
 
     for (var i = 0; i < ncs.length; i++) {
-        console.log("ciclo for " + i)
         var nc = ncs[i];
-        if (filtroEstado && nc.estado != filtroEstado) continue; //verficar se estado da nc corresponde ao filtro
-        if (filtroPesquisa && !nc.titulo.toLowerCase().includes(filtroPesquisa)) continue; //verificar se titulo da nc corresponde a pesquisa
+        
+        if (!temPermissaoDeVisualizar(nc.area)) continue;
 
-        var tr = document.createElement('tr'); //cria uma linha na tabela
-        var textoEstado;
-        if (nc.estado == 'aberta') {
-            textoEstado = 'Aberta';
-        } else if (nc.estado == 'analise') {
-            textoEstado = 'Em Análise';
-        } else {
-            textoEstado = 'Encerrada'
-        }
+        if (filtroEstado && nc.estado != filtroEstado) continue; 
+        if (filtroPesquisa && !nc.titulo.toLowerCase().includes(filtroPesquisa)) continue; 
+
+        var tr = document.createElement('tr'); 
+        var textoEstado = nc.estado == 'aberta' ? 'Aberta' : (nc.estado == 'analise' ? 'Em Análise' : 'Encerrada');
 
         tr.innerHTML = '<td><strong>' + nc.id + '</strong></td>' +
             '<td>' + nc.titulo + '</td>' +
@@ -111,12 +66,18 @@ function mostrarNCs() {
             '<td><span>' + textoEstado + '</span></td>' +
             '<td><button class="btn btn-sm btn-primary" onclick="verDetalhes(' + i + ')"><i class="bi bi-eye"></i></button></td>';
         tbody.appendChild(tr);
-
-
     }
 }
 
 document.getElementById('btnGuardarNC').onclick = function () {
+    //ver perms
+    var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
+    
+    if (utilizadorLogado.tipo === 'Utilizador Básico' && utilizadorLogado.departamento !== 'Qualidade') {
+        alert("Acesso Negado: Apenas o departamento de gestão/responsáveis de qualidade podem gerir Não Conformidades.");
+        return;
+    }
+
     var titulo = document.getElementById('ncTitulo').value;
     var desc = document.getElementById('ncDescricao').value;
     var area = document.getElementById('ncArea').value;
@@ -124,7 +85,7 @@ document.getElementById('btnGuardarNC').onclick = function () {
     var prio = document.getElementById('ncPrioridade').value;
     var data = document.getElementById('ncData').value;
 
-    if (!titulo || !desc || !area || !resp || !data) {  //verifica se foi tudo preenchido
+    if (!titulo || !desc || !area || !resp || !data) {  
         alert('Preencha todos os campos obrigatórios');
         return;
     }
@@ -153,7 +114,14 @@ document.getElementById('btnGuardarNC').onclick = function () {
 };
 
 document.getElementById('btnGuardarAC').onclick = function () {
+    //ver perms
+    var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
     
+    if (utilizadorLogado.tipo === 'Utilizador Básico' && utilizadorLogado.departamento !== 'Qualidade') {
+        alert("Acesso Negado: Apenas o departamento de gestão/responsáveis de qualidade podem gerir Ações Corretivas.");
+        return;
+    }
+
     var ncId = document.getElementById('ac_ncId').value;           
     var descricao = document.getElementById('ac_descricao').value;    
     var responsavel = document.getElementById('ac_responsavel').value;  
@@ -162,43 +130,34 @@ document.getElementById('btnGuardarAC').onclick = function () {
     var eficaciaAuditada = document.getElementById('ac_eficacia').value; 
     var comentarioAuditoria = document.getElementById('ac_comentario_auditoria').value; 
 
-
     if (!ncId || !descricao || !responsavel || !prazo) {
-        alert('Preencha os campos obrigatórios (Descrição, Responsável, Prazo e NC de Origem).');
+        alert('Preencha os campos obrigatórios.');
         return;
     }
 
-  
-    if (typeof contadorAC === 'undefined') { var contadorAC = 1; } // Apenas para simulação
     var id = 'AC' + ('000' + contadorAC).slice(-4); 
-
 
     var novaAC = {
         id: id,
         ncId: ncId,
         descricao: descricao,
         responsavel: responsavel,
-        data_inicio: new Date().toLocaleDateString('pt-PT'), // Data de início automática
+        data_inicio: new Date().toLocaleDateString('pt-PT'),
         prazo: prazo,
         estado: estado,
         eficacia_auditada: eficaciaAuditada,
-        comentario_auditoria: comentarioAuditoria || null // Guarda null se estiver vazio
+        comentario_auditoria: comentarioAuditoria || null
     };
 
     acs.push(novaAC);
     contadorAC++;
-
     guardarStorage(); 
 
-    //Limpar o formulário e fechar o modal
     document.getElementById('formNovaAC').reset();
+    bootstrap.Modal.getInstance(document.getElementById('modalNovaAC')).hide();
     
-    // Fecha o modal 
-    var modal = document.getElementById('modalNovaAC');
-    var bootstrapModal = bootstrap.Modal.getInstance(modal)
-    bootstrapModal.hide();
-    
-    alert('Ação Corretiva ' + id + ' criada com sucesso e ligada à NC ' + ncId + '!');
+    alert('Ação Corretiva ' + id + ' criada com sucesso!');
+    if(ncSelecionada !== null) verDetalhes(ncSelecionada);
 };
 
 function verDetalhes(index) {
@@ -221,39 +180,40 @@ function verDetalhes(index) {
     document.getElementById('detalheHistorico').innerHTML = historico;
     document.getElementById('ac_ncId').value = nc.id;
 
-    //mostrar as Ações Corretivas associadas à NC
-        var tabelaAcoes = document.getElementById('tabelaAcoes');
-        tabelaAcoes.innerHTML = ''; // Limpar a tabela
+    var tabelaAcoes = document.getElementById('tabelaAcoes');
+    tabelaAcoes.innerHTML = ''; 
 
-        var acs_associadas = [];
-        for(var i = 0; i < acs.length; i++){
-            if(acs[i].ncId == nc.id) acs_associadas.push(acs[i]);
-        }
+    var acs_associadas = acs.filter(ac => ac.ncId == nc.id);
 
-        if(acs_associadas.length > 0){
-            for(var i = 0; i < acs_associadas.length; i++){
-                var ac = acs_associadas[i];
-                var tr = document.createElement('tr');
-                
-                var textoEstado = ac.estado == 'pendente' ? 'Pendente' : ac.estado == 'em_progresso' ? 'Em Progresso' : 'Concluída';
-                
-                tr.innerHTML = '<td><strong>' + ac.id + '</strong></td>' +
-                    '<td>' + ac.descricao + '</td>' +
-                    '<td>' + ac.responsavel + '</td>' +
-                    '<td>' + ac.prazo.split('-').reverse().join('/') + '</td>' +
-                    '<td>'+ textoEstado + '</span></td>';
-                
-                tabelaAcoes.appendChild(tr);
-            }
-        } else {
-            // Se não houver ações, mostrar mensagem
-            tabelaAcoes.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Nenhuma ação corretiva associada.</td></tr>';
-        }
+    if(acs_associadas.length > 0){
+        acs_associadas.forEach(ac => {
+            var tr = document.createElement('tr');
+            tr.innerHTML = '<td><strong>' + ac.id + '</strong></td>' +
+                '<td>' + ac.descricao + '</td>' +
+                '<td>' + ac.responsavel + '</td>' +
+                '<td>' + ac.prazo.split('-').reverse().join('/') + '</td>' +
+                '<td>'+ ac.estado + '</span></td>';
+            tabelaAcoes.appendChild(tr);
+        });
+    } else {
+        tabelaAcoes.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Nenhuma ação corretiva associada.</td></tr>';
+    }
 
-    new bootstrap.Modal(document.getElementById('modalDetalhesNC')).show();
+    var modalEl = document.getElementById('modalDetalhesNC');
+    if(!modalEl.classList.contains('show')) {
+        new bootstrap.Modal(modalEl).show();
+    }
 }
 
 document.getElementById('btnAtualizarEstado').onclick = function () {
+    //ver perms
+    var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
+    
+    if (utilizadorLogado.tipo === 'Utilizador Básico' && utilizadorLogado.departamento !== 'Qualidade') {
+        alert("Acesso Negado: Apenas o departamento de gestão/responsáveis de qualidade podem gerir o estado.");
+        return;
+    }
+
     var modal = document.getElementById("modalDetalhesNC");
     var bootstrapModal = bootstrap.Modal.getInstance(modal);
     if (ncSelecionada == null) return;
@@ -264,19 +224,12 @@ document.getElementById('btnAtualizarEstado').onclick = function () {
     if (nc.estado == novoEstado) return;
 
     nc.estado = novoEstado;
-    var texto;
-    if (novoEstado == 'aberta') {
-        texto = 'Aberta';
-    } else if (novoEstado == 'analise') {
-        texto = 'Em análise';
-    } else {
-        texto = 'Encerrada'
-    }
-    nc.historico.push(texto + ' em ' + new Date().toLocaleDateString('pt-PT')); //regista no historico a atualizacao
+    var texto = nc.estado == 'aberta' ? 'Aberta' : (nc.estado == 'analise' ? 'Em análise' : 'Encerrada');
+    nc.historico.push(texto + ' em ' + new Date().toLocaleDateString('pt-PT'));
 
     guardarStorage();
     mostrarNCs();
-    bootstrapModal.hide(); //fecha o modal depois da atualização
+    bootstrapModal.hide(); 
     alert('O estado da não conformidade foi atualizado com sucesso');
 };
 

@@ -1,4 +1,4 @@
-var oms = []; //Array que guarda a soportunidades de melhoria
+var oms = []; 
 var contadorOM = 1;
 var omSelecionada = null;
 
@@ -18,39 +18,10 @@ function carregarStorage() {
         var cont = localStorage.getItem('contadorOM');
         if (cont) contadorOM = parseInt(cont);
     } else {
-        //Exemplos prefeitos para demonstrcaão
-        oms = [
-            {
-                id: 'OM0001',
-                titulo: 'Digitalizar registos de chão de fábrica',
-                descricao: 'Substituir papel por tablets na linha de produção.',
-                area: 'Produção',
-                prioridade: 'Alta',
-                dificuldade: 'Difícil',
-                impacto: 'Alto',
-                data: '2024-11-20T09:30', // Data com hora
-                estado: 'implementacao',
-                historico: [
-                    'Proposta criada em 20/11/2024 09:30', 
-                    'Estado alterado para Em Implementação em 25/11/2024 14:00'
-                ]
-            },
-            {
-                id: 'OM0002',
-                titulo: 'Curso de Inglês Técnico',
-                descricao: 'Melhorar comunicação com fornecedores',
-                area: 'Comercial',
-                prioridade: 'Média',
-                dificuldade: 'Fácil',
-                impacto: 'Médio',
-                data: '2024-12-01T10:15', // Data com hora
-                estado: 'proposta',
-                historico: ['Proposta criada em 01/12/2024 10:15']
-            }
-        ];
-        contadorOM = 3; 
-        guardarStorage();
+        oms = [];
+        contadorOM = 1; 
     }
+    guardarStorage();
 }
 
 function guardarStorage() {
@@ -58,20 +29,16 @@ function guardarStorage() {
     localStorage.setItem('contadorOM', contadorOM);
 }
 
-// Função auxiliar para formatar data e hora (dd/mm/aaaa hh:mm)
 function formatarDataHora(dataString) {
     if(!dataString) return "";
     var d = new Date(dataString);
     if(isNaN(d.getTime())) return dataString; 
-    
     return d.toLocaleDateString('pt-PT') + ' ' + d.toLocaleTimeString('pt-PT', {hour: '2-digit', minute:'2-digit'});
 }
 
 function mostrarOMs() {
-    console.log("mostrar oms");
-
     var tbody = document.getElementById("tabelaOMs");
-    tbody.innerHTML = ''; //limpar a tabela
+    tbody.innerHTML = ''; 
 
     var filtroEstado = document.getElementById("filtroEstado").value;
     var filtroPesquisa = document.getElementById("filtroPesquisa").value.toLowerCase();
@@ -79,7 +46,8 @@ function mostrarOMs() {
     for (var i = 0; i < oms.length; i++) {
         var om = oms[i];
         
-        // Filtros
+        if (!temPermissaoDeVisualizar(om.area)) continue;
+
         if (filtroEstado && om.estado != filtroEstado) continue; 
         if (filtroPesquisa && !om.titulo.toLowerCase().includes(filtroPesquisa)) continue; 
 
@@ -88,25 +56,11 @@ function mostrarOMs() {
         var textoEstado;
 
         switch(om.estado) {
-            case 'proposta':
-                corEstado = 'secondary';
-                textoEstado = 'Proposta';
-                break;
-            case 'avaliacao':
-                corEstado = 'warning';
-                textoEstado = 'Em Avaliação';
-                break;
-            case 'implementacao':
-                corEstado = 'primary';
-                textoEstado = 'Em Implementação';
-                break;
-            case 'concluida':
-                corEstado = 'success';
-                textoEstado = 'Concluída';
-                break;
-            default:
-                corEstado = 'light';
-                textoEstado = 'N/A';
+            case 'proposta': corEstado = 'secondary'; textoEstado = 'Proposta'; break;
+            case 'avaliacao': corEstado = 'warning'; textoEstado = 'Em Avaliação'; break;
+            case 'implementacao': corEstado = 'primary'; textoEstado = 'Em Implementação'; break;
+            case 'concluida': corEstado = 'success'; textoEstado = 'Concluída'; break;
+            default: corEstado = 'light'; textoEstado = 'N/A';
         }
 
         var dataFormatada = formatarDataHora(om.data);
@@ -123,13 +77,22 @@ function mostrarOMs() {
 }
 
 document.getElementById('btnGuardarOM').onclick = function () {
+    // --- VERIFICAÇÃO DE PERMISSÕES ---
+    var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
+    
+    if (utilizadorLogado.tipo === 'Utilizador Básico' && utilizadorLogado.departamento !== 'Qualidade') {
+        alert("Acesso Negado: Apenas o departamento de gestão/responsáveis de qualidade podem gerir Oportunidades.");
+        return;
+    }
+    // ---------------------------------
+
     var titulo = document.getElementById('omTitulo').value;
     var desc = document.getElementById('omDescricao').value;
     var area = document.getElementById('omArea').value;
     var prio = document.getElementById('omPrioridade').value;
     var dific = document.getElementById('omDificuldade').value; 
     var impac = document.getElementById('omImpacto').value;     
-    var data = document.getElementById('omData').value; // Isto agora traz Data E Hora
+    var data = document.getElementById('omData').value; 
 
     if (!titulo || !desc || !area || !prio || !data) {  
         alert('Preencha todos os campos obrigatórios');
@@ -137,8 +100,6 @@ document.getElementById('btnGuardarOM').onclick = function () {
     }
 
     var id = 'OM' + ('000' + contadorOM).slice(-4);
-    
-    //Histrico com data e hroa
     var dataAgora = new Date().toLocaleString('pt-PT', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
 
     var novaOM = {
@@ -149,7 +110,7 @@ document.getElementById('btnGuardarOM').onclick = function () {
         prioridade: prio,
         dificuldade: dific,
         impacto: impac,
-        data: data, // Guarda formato YYYY-MM-DDTHH:MM
+        data: data, 
         estado: 'proposta', 
         historico: ['Proposta criada em ' + dataAgora]
     };
@@ -160,8 +121,6 @@ document.getElementById('btnGuardarOM').onclick = function () {
     mostrarOMs();
 
     document.getElementById('formNovaOM').reset();
-    
-    //Reset para data atuael
     var now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     document.getElementById('omData').value = now.toISOString().slice(0, 16);
@@ -193,6 +152,15 @@ function verDetalhes(index) {
 }
 
 document.getElementById('btnAtualizarEstado').onclick = function () {
+    // --- VERIFICAÇÃO DE PERMISSÕES ---
+    var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
+    
+    if (utilizadorLogado.tipo === 'Utilizador Básico' && utilizadorLogado.departamento !== 'Qualidade') {
+        alert("Acesso Negado: Apenas o departamento de gestão/responsáveis de qualidade podem gerir Oportunidades.");
+        return;
+    }
+    // ---------------------------------
+
     if (omSelecionada == null) return;
 
     var novoEstado = document.getElementById("detalheEstado").value;
@@ -202,7 +170,6 @@ document.getElementById('btnAtualizarEstado').onclick = function () {
 
     om.estado = novoEstado;
     var textoEstado;
-    
     switch(novoEstado) {
         case 'proposta': textoEstado = 'Proposta'; break;
         case 'avaliacao': textoEstado = 'Em Avaliação'; break;
@@ -210,18 +177,14 @@ document.getElementById('btnAtualizarEstado').onclick = function () {
         case 'concluida': textoEstado = 'Concluída'; break;
     }
 
-    // Regista no histórico com HORA
     var dataAgora = new Date().toLocaleString('pt-PT', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
     om.historico.push('Estado alterado para ' + textoEstado + ' em ' + dataAgora);
 
     guardarStorage();
     mostrarOMs();
     
-    // Fecha o modal e mostra alerta
     alert('O estado da oportunidade foi atualizado com sucesso');
-    var elementoModal = document.getElementById('modalDetalhesOM');
-    var modalInstance = bootstrap.Modal.getInstance(elementoModal);
-    modalInstance.hide();
+    bootstrap.Modal.getInstance(document.getElementById('modalDetalhesOM')).hide();
 };
 
 document.getElementById('filtroEstado').onchange = mostrarOMs;

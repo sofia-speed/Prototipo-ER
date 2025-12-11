@@ -1,5 +1,3 @@
-// indicadores.js
-
 var indicadores = [];
 var contadorIND = 1;
 var indicadorSelecionado = null;
@@ -16,31 +14,8 @@ function carregarStorage() {
         var cont = localStorage.getItem('contadorIND');
         if (cont) contadorIND = parseInt(cont);
     } else {
-        // Exemplos iniciais
-        indicadores = [
-            {
-                id: 'IND0001',
-                nome: 'Número de Reclamações Mensais',
-                departamento: 'Qualidade',
-                meta: 'No máximo 3 reclamações por mês',
-                valor: 5, // Valor atual
-                historico: [
-                    'Indicador criado com valor inicial: 5 em 12/12/2024',
-                ]
-            },
-            {
-                id: 'IND0002',
-                nome: 'Tempo Médio de Resolução de NC',
-                departamento: 'Produção',
-                meta: 'Resolver NC em até 10 dias',
-                valor: 14,
-                historico: [
-                    'Indicador criado com valor inicial: 14 em 05/12/2024',
-                ]
-            }
-        ];
-        contadorIND = 3;
-        guardarStorage();
+        indicadores = [];
+        contadorIND = 1;
     }
 }
 
@@ -50,7 +25,6 @@ function guardarStorage() {
 }
 
 function mostrarIndicadores() {
-
     var tbody = document.getElementById("tabelaIndicadores");
     tbody.innerHTML = '';
 
@@ -59,6 +33,9 @@ function mostrarIndicadores() {
 
     for (var i = 0; i < indicadores.length; i++) {
         var ind = indicadores[i];
+
+        // Filtro de Segurança Visual (Auth.js)
+        if (!temPermissaoDeVisualizar(ind.departamento)) continue;
 
         if (filtroArea && ind.departamento != filtroArea) continue;
         if (filtroPesquisa && !ind.nome.toLowerCase().includes(filtroPesquisa)) continue;
@@ -77,6 +54,14 @@ function mostrarIndicadores() {
 }
 
 document.getElementById('btnGuardarIndicador').onclick = function () {
+    //ver perms
+    var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
+
+    if (utilizadorLogado.tipo === 'Utilizador Básico' && utilizadorLogado.departamento !== 'Qualidade') {
+        alert("Acesso Negado: Apenas o departamento de gestão/responsáveis de qualidade podem gerir indicadores.");
+        return;
+    }
+    
     var nome = document.getElementById('indNome').value;
     var dept = document.getElementById('indDepartamento').value;
     var meta = document.getElementById('indMeta').value;
@@ -126,6 +111,14 @@ function verDetalhes(index) {
 }
 
 document.getElementById('btnAtualizarValor').onclick = function () {
+    //ver eprms
+    var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
+
+    if (utilizadorLogado.tipo === 'Utilizador Básico' && utilizadorLogado.departamento !== 'Qualidade') {
+        alert("Acesso Negado: Apenas o departamento de gestão/responsáveis de qualidade podem gerir indicadores.");
+        return;
+    }
+
     if (indicadorSelecionado == null) return;
 
     var novoValor = document.getElementById('novoValorAtual').value;
