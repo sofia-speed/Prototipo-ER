@@ -1,8 +1,8 @@
-var ncs = []; 
-var acs = []; 
-var contador = 1; 
+var ncs = [];
+var acs = [];
+var contador = 1;
 var contadorAC = 1;
-var ncSelecionada = null; 
+var ncSelecionada = null;
 
 window.onload = function () {
     carregarStorage();
@@ -14,21 +14,21 @@ window.onload = function () {
 function carregarStorage() {
     var dados_ncs = localStorage.getItem('ncs');
     var dados_acs = localStorage.getItem('acs');
-    if (dados_ncs) { 
+    if (dados_ncs) {
         ncs = JSON.parse(dados_ncs);
         var cont = localStorage.getItem('contador');
         if (cont) contador = parseInt(cont);
     } else {
         ncs = [];
-        contador = 1; 
+        contador = 1;
     }
-    if (dados_acs) {  
+    if (dados_acs) {
         acs = JSON.parse(dados_acs);
         var contAC = localStorage.getItem('contadorAC');
         if (contAC) contadorAC = parseInt(contAC);
     } else {
-        acs =[];
-        contadorAC = 1; 
+        acs = [];
+        contadorAC = 1;
     }
     guardarStorage();
 }
@@ -42,20 +42,20 @@ function guardarStorage() {
 
 function mostrarNCs() {
     var tbody = document.getElementById("tabelaNCs");
-    tbody.innerHTML = ''; 
+    tbody.innerHTML = '';
 
     var filtroEstado = document.getElementById("filtroEstado").value;
     var filtroPesquisa = document.getElementById("filtroPesquisa").value.toLowerCase();
 
     for (var i = 0; i < ncs.length; i++) {
         var nc = ncs[i];
-        
+
         if (!temPermissaoDeVisualizar(nc.area)) continue;
 
-        if (filtroEstado && nc.estado != filtroEstado) continue; 
-        if (filtroPesquisa && !nc.titulo.toLowerCase().includes(filtroPesquisa)) continue; 
+        if (filtroEstado && nc.estado != filtroEstado) continue;
+        if (filtroPesquisa && !nc.titulo.toLowerCase().includes(filtroPesquisa)) continue;
 
-        var tr = document.createElement('tr'); 
+        var tr = document.createElement('tr');
         var textoEstado = nc.estado == 'aberta' ? 'Aberta' : (nc.estado == 'analise' ? 'Em Análise' : 'Encerrada');
 
         tr.innerHTML = '<td><strong>' + nc.id + '</strong></td>' +
@@ -72,7 +72,7 @@ function mostrarNCs() {
 document.getElementById('btnGuardarNC').onclick = function () {
     //ver perms
     var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
-    
+
     if (utilizadorLogado.tipo === 'Utilizador Básico' && utilizadorLogado.departamento !== 'Qualidade') {
         alert("Acesso Negado: Apenas o departamento de gestão/responsáveis de qualidade podem gerir Não Conformidades.");
         return;
@@ -85,7 +85,7 @@ document.getElementById('btnGuardarNC').onclick = function () {
     var prio = document.getElementById('ncPrioridade').value;
     var data = document.getElementById('ncData').value;
 
-    if (!titulo || !desc || !area || !resp || !data) {  
+    if (!titulo || !desc || !area || !resp || !data) {
         alert('Preencha todos os campos obrigatórios');
         return;
     }
@@ -116,26 +116,35 @@ document.getElementById('btnGuardarNC').onclick = function () {
 document.getElementById('btnGuardarAC').onclick = function () {
     //ver perms
     var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
-    
+
     if (utilizadorLogado.tipo === 'Utilizador Básico' && utilizadorLogado.departamento !== 'Qualidade') {
         alert("Acesso Negado: Apenas o departamento de gestão/responsáveis de qualidade podem gerir Ações Corretivas.");
         return;
     }
 
-    var ncId = document.getElementById('ac_ncId').value;           
-    var descricao = document.getElementById('ac_descricao').value;    
-    var responsavel = document.getElementById('ac_responsavel').value;  
-    var prazo = document.getElementById('ac_prazo').value;        
-    var estado = document.getElementById('ac_estado').value;         
-    var eficaciaAuditada = document.getElementById('ac_eficacia').value; 
-    var comentarioAuditoria = document.getElementById('ac_comentario_auditoria').value; 
+    var ncId = document.getElementById('ac_ncId').value;
+    var descricao = document.getElementById('ac_descricao').value;
+    var responsavel = document.getElementById('ac_responsavel').value;
+    var prazo = document.getElementById('ac_prazo').value;
+    var estado = document.getElementById('ac_estado').value;
+    var eficaciaAuditada = document.getElementById('ac_eficacia').value;
+    var comentarioAuditoria = document.getElementById('ac_comentario_auditoria').value;
 
     if (!ncId || !descricao || !responsavel || !prazo) {
         alert('Preencha os campos obrigatórios.');
         return;
     }
 
-    var id = 'AC' + ('000' + contadorAC).slice(-4); 
+    var hoje = new Date();
+    var dataPrazo = new Date(prazo);
+    hoje.setHours(0, 0, 0, 0);
+
+    if (dataPrazo < hoje) {
+        alert("O prazo não pode ser anterior à data atual.");
+        return;
+    }
+
+    var id = 'AC' + ('000' + contadorAC).slice(-4);
 
     var novaAC = {
         id: id,
@@ -151,13 +160,13 @@ document.getElementById('btnGuardarAC').onclick = function () {
 
     acs.push(novaAC);
     contadorAC++;
-    guardarStorage(); 
+    guardarStorage();
 
     document.getElementById('formNovaAC').reset();
     bootstrap.Modal.getInstance(document.getElementById('modalNovaAC')).hide();
-    
+
     alert('Ação Corretiva ' + id + ' criada com sucesso!');
-    if(ncSelecionada !== null) verDetalhes(ncSelecionada);
+    if (ncSelecionada !== null) verDetalhes(ncSelecionada);
 };
 
 function verDetalhes(index) {
@@ -181,18 +190,18 @@ function verDetalhes(index) {
     document.getElementById('ac_ncId').value = nc.id;
 
     var tabelaAcoes = document.getElementById('tabelaAcoes');
-    tabelaAcoes.innerHTML = ''; 
+    tabelaAcoes.innerHTML = '';
 
     var acs_associadas = acs.filter(ac => ac.ncId == nc.id);
 
-    if(acs_associadas.length > 0){
+    if (acs_associadas.length > 0) {
         acs_associadas.forEach(ac => {
             var tr = document.createElement('tr');
             tr.innerHTML = '<td><strong>' + ac.id + '</strong></td>' +
                 '<td>' + ac.descricao + '</td>' +
                 '<td>' + ac.responsavel + '</td>' +
                 '<td>' + ac.prazo.split('-').reverse().join('/') + '</td>' +
-                '<td>'+ ac.estado + '</span></td>';
+                '<td>' + ac.estado + '</span></td>';
             tabelaAcoes.appendChild(tr);
         });
     } else {
@@ -200,7 +209,7 @@ function verDetalhes(index) {
     }
 
     var modalEl = document.getElementById('modalDetalhesNC');
-    if(!modalEl.classList.contains('show')) {
+    if (!modalEl.classList.contains('show')) {
         new bootstrap.Modal(modalEl).show();
     }
 }
@@ -208,7 +217,7 @@ function verDetalhes(index) {
 document.getElementById('btnAtualizarEstado').onclick = function () {
     //ver perms
     var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
-    
+
     if (utilizadorLogado.tipo === 'Utilizador Básico' && utilizadorLogado.departamento !== 'Qualidade') {
         alert("Acesso Negado: Apenas o departamento de gestão/responsáveis de qualidade podem gerir o estado.");
         return;
@@ -223,13 +232,17 @@ document.getElementById('btnAtualizarEstado').onclick = function () {
 
     if (nc.estado == novoEstado) return;
 
+    if (!confirm("Confirmar alteração do estado da não conformidade?")) {
+        return;
+    }
+
     nc.estado = novoEstado;
     var texto = nc.estado == 'aberta' ? 'Aberta' : (nc.estado == 'analise' ? 'Em análise' : 'Encerrada');
     nc.historico.push(texto + ' em ' + new Date().toLocaleDateString('pt-PT'));
 
     guardarStorage();
     mostrarNCs();
-    bootstrapModal.hide(); 
+    bootstrapModal.hide();
     alert('O estado da não conformidade foi atualizado com sucesso');
 };
 
