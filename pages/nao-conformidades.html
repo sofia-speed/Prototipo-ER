@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="../css/global.css" rel="stylesheet">
 </head>
+
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -43,7 +45,8 @@
     <div class="container mt-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Gestão de Não Conformidades</h2>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNovaNC">Nova Não Conformidade</button>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNovaNC">Nova Não
+                Conformidade</button>
         </div>
 
         <!-- Filtros -->
@@ -216,15 +219,17 @@
                                         <th>Responsável</th>
                                         <th>Prazo</th>
                                         <th>Estado</th>
+                                        <th>Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabelaAcoes">
-                                   <!--acoes inseridas por js-->
+                                    <!--acoes inseridas por js-->
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalNovaAC">Criar Ação Corretiva</button>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalNovaAC">Criar Ação
+                        Corretiva</button>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
@@ -234,77 +239,71 @@
         </div>
     </div>
 
-<div class="modal fade" id="modalNovaAC">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalNovaACLabel">Nova Ação Corretiva (AC)</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="formNovaAC">
-                    <div class="mb-3">
-                        <label class="form-label">Ligada à Não Conformidade (NC ID)</label>
-                        <input type="text" class="form-control" id="ac_ncId" value=""> <!--value colocado com js-->
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="ac_descricao" class="form-label">Descrição da Ação Corretiva*</label>
-                        <textarea class="form-control" id="ac_descricao" rows="2" required></textarea>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="ac_responsavel" class="form-label">Responsável*</label>
-                            <select class="form-select" id="ac_responsavel" required>
-                                <option value="">Selecione...</option>
-                            </select>
+    <div class="modal fade" id="modalNovaAC">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalNovaACLabel">Nova Ação Corretiva (AC)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formNovaAC">
+                        <div class="mb-3">
+                            <label class="form-label">Ligada à Não Conformidade (NC ID)</label>
+                            <input type="text" class="form-control" id="ac_ncId" value="" readonly>
+                            <!--value colocado com js-->
                         </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <label for="ac_prazo" class="form-label">Prazo Final*</label>
-                            <input type="date" class="form-control" id="ac_prazo" value="2026-03-02" required>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="ac_estado" class="form-label">Estado da Ação*</label>
-                            <select class="form-select" id="ac_estado" required>
-                                <option value="em execucao" selected>Em execução</option>
-                                <option value="finalizada">Finalizada</option>
-                                <option value="reaberta">Reaberta</option>
-                            </select>
-                        </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <label for="ac_eficacia" class="form-label">Eficácia Auditada*</label>
-                            <select class="form-select" id="ac_eficacia" required>
-                                <option value="false" selected>Não Auditada/Pendente</option>
-                                <option value="true">Sim (Eficaz)</option>
-                                <option value="false_ineficaz">Não (Ineficaz)</option>
-                            </select>
-                        </div>
-                    </div>
 
-                    <div class="mb-3">
-                        <label for="ac_comentario_auditoria" class="form-label">Comentário de Auditoria / Justificação de Reabertura (AC5.1)</label>
-                        <textarea class="form-control" id="ac_comentario_auditoria" rows="2"></textarea>
-                    </div>
+                        <div class="mb-3">
+                            <label for="ac_descricao" class="form-label">Descrição da Ação Corretiva*</label>
+                            <textarea class="form-control" id="ac_descricao" rows="2" required></textarea>
+                        </div>
 
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="ac_responsavel" class="form-label">Responsável*</label>
+                                <select class="form-select" id="ac_responsavel" required>
+                                    <option value="">Selecione...</option>
+                                </select>
+                            </div>
 
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="btnGuardarAC">Guardar Ação</button>
+                            <div class="col-md-6 mb-3">
+                                <label for="ac_prazo" class="form-label">Prazo Final*</label>
+                                <input type="date" class="form-control" id="ac_prazo" value="2026-03-02" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="ac_estado" class="form-label">Estado da Ação*</label>
+                                <select class="form-select" id="ac_estado" required>
+                                    <option value="em_execucao" selected>Em execução</option>
+                                    <option value="concluida">Concluída</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="ac_eficacia" class="form-label">Eficácia Auditada*</label>
+                                <select class="form-select" id="ac_eficacia" required>
+                                    <option value="pendente" selected>Pendente</option>
+                                    <option value="eficaz">Eficaz</option>
+                                    <option value="ineficaz">Ineficaz</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnGuardarAC">Guardar Ação</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/auth.js"></script> <script src="../js/nc.js"></script>
+    <script src="../js/auth.js"></script>
     <script src="../js/nc.js"></script>
 </body>
+
 </html>

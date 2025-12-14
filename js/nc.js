@@ -97,10 +97,11 @@ document.getElementById('btnGuardarNC').onclick = function () {
         descricao: desc,
         area: area,
         responsavel: resp,
+        responsavelId: utilizadorLogado.id,
         prioridade: prio,
         data: data,
         estado: 'aberta',
-        historico: ['aberta em ' + new Date().toLocaleDateString('pt-PT')]
+        historico: [id + '- Aberta em ' + new Date().toLocaleDateString('pt-PT')]
     };
 
     ncs.push(novaNC);
@@ -114,7 +115,7 @@ document.getElementById('btnGuardarNC').onclick = function () {
 };
 
 document.getElementById('btnGuardarAC').onclick = function () {
-    //ver perms
+    console.log("Botão de Guardar Ação Corretiva clicado!");
     var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
 
     if (utilizadorLogado.tipo === 'Utilizador Básico' && utilizadorLogado.departamento !== 'Qualidade') {
@@ -128,7 +129,6 @@ document.getElementById('btnGuardarAC').onclick = function () {
     var prazo = document.getElementById('ac_prazo').value;
     var estado = document.getElementById('ac_estado').value;
     var eficaciaAuditada = document.getElementById('ac_eficacia').value;
-    var comentarioAuditoria = document.getElementById('ac_comentario_auditoria').value;
 
     if (!ncId || !descricao || !responsavel || !prazo) {
         alert('Preencha os campos obrigatórios.');
@@ -155,7 +155,7 @@ document.getElementById('btnGuardarAC').onclick = function () {
         prazo: prazo,
         estado: estado,
         eficacia_auditada: eficaciaAuditada,
-        comentario_auditoria: comentarioAuditoria || null
+        historico: [id + '- Criada em ' + new Date().toLocaleDateString('pt-PT')]
     };
 
     acs.push(novaAC);
@@ -197,16 +197,38 @@ function verDetalhes(index) {
     if (acs_associadas.length > 0) {
         acs_associadas.forEach(ac => {
             var tr = document.createElement('tr');
-            tr.innerHTML = '<td><strong>' + ac.id + '</strong></td>' +
+            tr.innerHTML =
+                '<td><strong>' + ac.id + '</strong></td>' +
                 '<td>' + ac.descricao + '</td>' +
                 '<td>' + ac.responsavel + '</td>' +
                 '<td>' + ac.prazo.split('-').reverse().join('/') + '</td>' +
-                '<td>' + ac.estado + '</span></td>';
+                '<td>' + ac.estado + '</td>' +
+                '<td>' +
+                (ac.estado === 'em_execucao'
+                    ? '<button class="btn btn-sm btn-success" onclick="finalizarAC(\'' + ac.id + '\')">Concluir</button>'
+                    : ac.estado === 'concluida'
+                        ? '<button class="btn btn-sm btn-warning" onclick="auditarAC(\'' + ac.id + '\')">Auditar</button>'
+                        : ac.estado === 'reaberta'
+                            ? '<button class="btn btn-sm btn-success" onclick="finalizarAC(\'' + ac.id + '\')">Concluir</button>' // Mantém o botão "Concluir" visível quando reaberta
+                            : '-'
+                ) +
+                '</td>';
             tabelaAcoes.appendChild(tr);
         });
     } else {
         tabelaAcoes.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Nenhuma ação corretiva associada.</td></tr>';
     }
+
+    acs_associadas.forEach(ac => {
+        if (ac.historico && ac.historico.length > 0) {
+            ac.historico.forEach(h => {
+                var acHistoricoItem = document.createElement('li');
+                acHistoricoItem.className = 'list-group-item';
+                acHistoricoItem.textContent = h;
+                document.getElementById('detalheHistorico').appendChild(acHistoricoItem);
+            });
+        }
+    });
 
     var modalEl = document.getElementById('modalDetalhesNC');
     if (!modalEl.classList.contains('show')) {
@@ -238,13 +260,97 @@ document.getElementById('btnAtualizarEstado').onclick = function () {
 
     nc.estado = novoEstado;
     var texto = nc.estado == 'aberta' ? 'Aberta' : (nc.estado == 'analise' ? 'Em análise' : 'Encerrada');
-    nc.historico.push(texto + ' em ' + new Date().toLocaleDateString('pt-PT'));
+    nc.historico.push(
+        nc.id + ' - ' + texto + ' em ' + new Date().toLocaleDateString('pt-PT')
+    );
 
     guardarStorage();
     mostrarNCs();
     bootstrapModal.hide();
     alert('O estado da não conformidade foi atualizado com sucesso');
 };
+
+function finalizarAC(acId) {
+    var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
+
+    if (utilizadorLogado.tipo !== 'Gestão da Qualidade') {
+        alert("Apenas a Gestão da Qualidade pode finalizar ações corretivas.");
+        return;
+    }
+
+    if (!confirm("Confirmar finalização da ação corretiva?")) return;
+
+    var ac = acs.find(a => a.id === acId);
+    if (!ac) return;
+
+    ac.estado = 'concluida';
+    ac.eficacia_auditada = 'pendente';
+
+    if (!ac.historico) ac.historico = [];
+
+    ac.historico.push(
+        ac.id + " - Concluída em " + new Date().toLocaleDateString('pt-PT')
+    );
+
+    guardarStorage();
+    if (ncSelecionada !== null) verDetalhes(ncSelecionada);
+
+    alert("Ação corretiva finalizada com sucesso.");
+}
+
+function auditarAC(acId) {
+    var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
+
+    if (
+        utilizadorLogado.tipo !== 'Auditor Interno' &&
+        utilizadorLogado.tipo !== 'Auditor Externo' &&
+        utilizadorLogado.tipo !== 'Gestão da Qualidade'
+    ) {
+        alert("Apenas auditores ou gestão da qualidade podem auditar ações corretivas.");
+        return;
+    }
+
+    var ac = acs.find(a => a.id === acId);
+    if (!ac) return;
+
+    // Verifica se a AC está concluída
+    if (ac.estado !== 'concluida') {
+        alert("A ação corretiva ainda não está concluída.");
+        return;
+    }
+
+    // Prompt para avaliação de eficácia
+    var eficacia = prompt("Avaliação da eficácia (Eficaz / Ineficaz):");
+    if (!eficacia) return;  // Se não for preenchido, sai da função
+
+    // Prompt para comentário de auditoria
+    var comentario = prompt("Comentário de auditoria:");
+    if (!comentario) return;  // Se não for preenchido, sai da função
+
+    // Salva a eficácia e o comentário no objeto AC
+    ac.eficacia_auditada = eficacia;
+    ac.comentario_auditoria = comentario;
+
+    // Adiciona essa informação ao histórico da AC
+    if (!ac.historico) ac.historico = [];  // Garante que o histórico existe
+    ac.historico.push(
+        ac.id + "- Auditada como " + eficacia + " em " + new Date().toLocaleDateString('pt-PT') +
+        " | Comentário de Auditoria: " + comentario
+    );
+
+    // Se a eficácia for "Ineficaz", reabre a AC
+    if (eficacia.toLowerCase() === 'ineficaz') {
+        ac.estado = 'reaberta';  // Mudar o estado para "reaberta"
+        ac.historico.push(ac.id + "- Reaberta após auditoria");
+    }
+
+    // Salva os dados no localStorage para persistência
+    guardarStorage();
+
+    if (ncSelecionada !== null) verDetalhes(ncSelecionada);
+
+    alert("Auditoria registada com sucesso.");
+}
 
 document.getElementById('filtroEstado').onchange = mostrarNCs;
 document.getElementById('filtroPesquisa').oninput = mostrarNCs;

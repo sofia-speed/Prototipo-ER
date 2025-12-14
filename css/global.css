@@ -5,3 +5,13 @@ body {
     padding-top: 20px;
     padding-bottom: 20px;
 }
+#detalheHistorico {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    white-space: normal;
+}
+
+#detalheHistorico li {
+    word-wrap: break-word;
+}

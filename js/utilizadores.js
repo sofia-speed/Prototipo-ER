@@ -1,11 +1,11 @@
 var utilizadores = [];
 var contadorUSER = 1;
-var utilizadorLogado = null; 
+var utilizadorLogado = null;
 
 window.onload = function () {
     // 1. Carregar o utilizador logado da Sessão (Nome chave corrigido para utilizadorLogado)
-    var sessionUser = sessionStorage.getItem('utilizadorLogado'); 
-    
+    var sessionUser = sessionStorage.getItem('utilizadorLogado');
+
     if (sessionUser) {
         utilizadorLogado = JSON.parse(sessionUser);
         console.log("Utilizador Logado:", utilizadorLogado.nome, "| Tipo:", utilizadorLogado.tipo);
@@ -29,7 +29,7 @@ window.onload = function () {
 
 function carregarStorage() {
     var dados = localStorage.getItem('utilizadores');
-    
+
     if (dados) {
         utilizadores = JSON.parse(dados);
         var cont = localStorage.getItem('contadorUSER');
@@ -51,7 +51,7 @@ function mostrarUtilizadores() {
 
     var filtroTipo = document.getElementById("filtroTipo").value;
     var filtroPesquisa = document.getElementById("filtroPesquisa").value.toLowerCase();
-    
+
     var isAdmin = (utilizadorLogado && utilizadorLogado.tipo === 'AdminWeb');
 
     for (var i = 0; i < utilizadores.length; i++) {
@@ -67,13 +67,13 @@ function mostrarUtilizadores() {
             '<td>' + u.email + '</td>' +
             '<td>' + u.departamento + '</td>' +
             '<td>' + u.tipo + '</td>';
-        
+
         if (isAdmin) {
             html += '<td>' +
                 '<button class="btn btn-sm btn-danger" onclick="eliminarUtilizador(\'' + u.id + '\')" title="Eliminar">' +
-                    '<i class="bi bi-trash"></i>' +
+                '<i class="bi bi-trash"></i>' +
                 '</button>' +
-            '</td>';
+                '</td>';
         } else {
             html += '<td class="text-muted text-center"><small>-</small></td>';
         }
@@ -95,7 +95,7 @@ function eliminarUtilizador(id) {
     }
 
     if (confirm("ATENÇÃO: Tem a certeza que deseja eliminar o utilizador " + id + "? Esta ação é irreversível.")) {
-        utilizadores = utilizadores.filter(function(user) {
+        utilizadores = utilizadores.filter(function (user) {
             return user.id !== id;
         });
         guardarStorage();
@@ -111,6 +111,11 @@ document.getElementById('btnGuardarUtilizador').onclick = function () {
 
     var nome = document.getElementById('userNome').value;
     var email = document.getElementById('userEmail').value;
+    var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        alert("Email inválido.");
+        return;
+    }
     var dept = document.getElementById('userDept').value;
     var tipo = document.getElementById('userTipo').value;
 
