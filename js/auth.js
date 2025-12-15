@@ -18,7 +18,7 @@ function garantirUtilizadores() {
             // Admi
             { id: 'USR0001', nome: 'SystemWebAdmin', email: 'SystemWebAdmin@empresa.pt', departamento: 'TI', tipo: 'AdminWeb' },
             
-            // Qualidade
+            // Qualidade 
             { id: 'USR0007', nome: 'Inês Silva', email: 'qualidade@empresa.pt', departamento: 'Qualidade', tipo: 'Gestão da Qualidade' },
             
             // Responsaveis de Área
