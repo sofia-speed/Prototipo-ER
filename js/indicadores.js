@@ -5,6 +5,7 @@ var indicadorSelecionado = null;
 window.onload = function () {
     carregarStorage();
     mostrarIndicadores();
+    configurarModalNovoIndicador();
 };
 
 function carregarStorage() {
@@ -45,7 +46,7 @@ function mostrarIndicadores() {
         tr.innerHTML = '<td><strong>' + ind.id + '</strong></td>' +
             '<td>' + ind.nome + '</td>' +
             '<td>' + ind.departamento + '</td>' +
-            '<td>' + ind.meta + '</td>' +
+            '<td class="texto-quebra">' + ind.meta + '</td>' +
             '<td>' + ind.valor + '</td>' +
             '<td><button class="btn btn-primary btn-sm" onclick="verDetalhes(' + i + ')"><i class="bi bi-eye"></i></button></td>';
 
@@ -109,6 +110,32 @@ function verDetalhes(index) {
 
     new bootstrap.Modal(document.getElementById('modalDetalhesIndicador')).show();
 }
+
+function configurarModalNovoIndicador() {
+    var modal = document.getElementById('modalNovoIndicador');
+    var selectDept = document.getElementById('indDepartamento');
+
+    if (!modal || !selectDept) return;
+
+    modal.addEventListener('show.bs.modal', function () {
+        var user = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
+
+        document.getElementById('formNovoIndicador').reset();
+
+        var isAdminOrQuality =
+            user.tipo === 'AdminWeb' ||
+            user.tipo === 'Gestão da Qualidade';
+
+        if (isAdminOrQuality) {
+            selectDept.disabled = false;
+            selectDept.value = '';
+        } else {
+            selectDept.value = user.departamento;
+            selectDept.disabled = true;
+        }
+    });
+}
+
 
 document.getElementById('btnAtualizarValor').onclick = function () {
     //ver eprms

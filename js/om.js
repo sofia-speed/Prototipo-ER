@@ -5,6 +5,7 @@ var omSelecionada = null;
 window.onload = function () {
     carregarStorage();
     mostrarOMs();
+    configurarModalNovaOM();
     
     var now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -149,6 +150,39 @@ function verDetalhes(index) {
     document.getElementById('detalheHistorico').innerHTML = historicoHTML;
 
     new bootstrap.Modal(document.getElementById('modalDetalhesOM')).show();
+}
+
+function configurarModalNovaOM() {
+    var modal = document.getElementById('modalNovaOM');
+    var selectArea = document.getElementById('omArea');
+
+    if (!modal || !selectArea) return;
+
+    modal.addEventListener('show.bs.modal', function () {
+        var user = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
+
+        // reset do formulário
+        document.getElementById('formNovaOM').reset();
+
+        var isAdminOrQuality =
+            user.tipo === 'AdminWeb' ||
+            user.tipo === 'Gestão da Qualidade';
+
+        if (isAdminOrQuality) {
+            // Pode escolher
+            selectArea.disabled = false;
+            selectArea.value = '';
+        } else {
+            // Área automática e bloqueada
+            selectArea.value = user.departamento;
+            selectArea.disabled = true;
+        }
+
+        // voltar a colocar a data atual
+        var now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('omData').value = now.toISOString().slice(0, 16);
+    });
 }
 
 document.getElementById('btnAtualizarEstado').onclick = function () {

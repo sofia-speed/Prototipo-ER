@@ -15,3 +15,17 @@ body {
 #detalheHistorico li {
     word-wrap: break-word;
 }
+
+#detalheDescricao {
+    max-width: 100%;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.texto-quebra {
+    max-width: 300px;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
