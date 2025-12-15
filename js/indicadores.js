@@ -1,6 +1,7 @@
 var indicadores = [];
 var contadorIND = 1;
 var indicadorSelecionado = null;
+var graficoEstado = null;
 
 window.onload = function () {
     carregarStorage();
@@ -62,7 +63,7 @@ document.getElementById('btnGuardarIndicador').onclick = function () {
         alert("Acesso Negado: Apenas o departamento de gestão/responsáveis de qualidade podem gerir indicadores.");
         return;
     }
-    
+
     var nome = document.getElementById('indNome').value;
     var dept = document.getElementById('indDepartamento').value;
     var meta = document.getElementById('indMeta').value;
@@ -84,7 +85,8 @@ document.getElementById('btnGuardarIndicador').onclick = function () {
         valor: Number(valor),
         historico: [
             'Indicador criado com valor inicial: ' + valor + ' em ' + dataAgora
-        ]
+        ],
+        sentido: document.getElementById('indSentido').value
     };
 
     indicadores.push(novoIndicador);
@@ -109,6 +111,7 @@ function verDetalhes(index) {
     document.getElementById('novoValorAtual').value = '';
 
     new bootstrap.Modal(document.getElementById('modalDetalhesIndicador')).show();
+    desenharGauge(ind);
 }
 
 function configurarModalNovoIndicador() {
@@ -158,7 +161,7 @@ document.getElementById('btnAtualizarValor').onclick = function () {
     var valorAnterior = ind.valor;
     ind.valor = Number(novoValor);
 
-    var dataAgora = new Date().toLocaleDateString('pt-PT') + ' ' + new Date().toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'});
+    var dataAgora = new Date().toLocaleDateString('pt-PT') + ' ' + new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
 
     ind.historico.push('Valor atualizado de ' + valorAnterior + ' para ' + novoValor + ' em ' + dataAgora);
 
@@ -168,6 +171,87 @@ document.getElementById('btnAtualizarValor').onclick = function () {
     bootstrap.Modal.getInstance(document.getElementById('modalDetalhesIndicador')).hide();
     alert('Valor atualizado com sucesso!');
 }
+
+function extrairNumero(texto) {
+    var match = texto.match(/\d+/);
+    return match ? Number(match[0]) : null;
+}
+
+function avaliarIndicador(valor, meta, sentido) {
+
+    if (sentido === 'menor_melhor') {
+        if (valor <= meta) return 'bom';
+        if (valor <= meta * 1.1) return 'atencao';
+        return 'mau';
+    }
+
+    if (sentido === 'maior_melhor') {
+        if (valor >= meta) return 'bom';
+        if (valor >= meta * 0.9) return 'atencao';
+        return 'mau';
+    }
+}
+
+function desenharGauge(ind) {
+
+    var meta = extrairNumero(ind.meta);
+    if (!meta || meta <= 0) return;
+
+    var valor = ind.valor;
+    var percentagem;
+
+    if (ind.sentido === 'maior_melhor') {
+        percentagem = valor / meta;
+    } else {
+        percentagem = meta / valor;
+    }
+
+    percentagem = Math.max(0, Math.min(percentagem, 1));
+
+    var estado =
+        percentagem >= 0.85 ? 'bom' :
+            percentagem >= 0.55 ? 'atencao' :
+                'mau';
+
+    var cores = {
+        bom: '#28a745',
+        atencao: '#ffc107',
+        mau: '#dc3545'
+    };
+
+    var ctx = document.getElementById('graficoEstado').getContext('2d');
+
+    if (graficoEstado) graficoEstado.destroy();
+
+    graficoEstado = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [percentagem, 1 - percentagem],
+                backgroundColor: [cores[estado], '#e9ecef'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            cutout: '75%',
+            rotation: -90,
+            circumference: 180,
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: false }
+            }
+        }
+    });
+
+    document.getElementById('textoEstado').textContent =
+        valor + ' / ' + meta + ' (' +
+        (estado === 'bom' ? 'OK' :
+            estado === 'atencao' ? 'Atenção' :
+                'Fora da Meta') + ')';
+}
+
+
+
 
 document.getElementById('filtroArea').onchange = mostrarIndicadores;
 document.getElementById('filtroPesquisa').oninput = mostrarIndicadores;
