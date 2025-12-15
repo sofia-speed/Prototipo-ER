@@ -7,9 +7,86 @@ var ncSelecionada = null;
 window.onload = function () {
     carregarStorage();
     mostrarNCs();
-    document.getElementById('ncData').valueAsDate = new Date();
-    carregarSelectUsuarios(['ncResponsavel', 'ac_responsavel']);
+
+    // Configurar data atual
+    var dateControl = document.getElementById('ncData');
+    if(dateControl) dateControl.valueAsDate = new Date();
+
+    // Lógica de Segurança Inicial (Esconder botão se for Básico)
+    var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
+    var btnNovaNC = document.querySelector('button[data-bs-target="#modalNovaNC"]');
+    
+    if (utilizadorLogado && utilizadorLogado.tipo === 'Utilizador Básico' && utilizadorLogado.departamento !== 'Qualidade') {
+        if(btnNovaNC) btnNovaNC.style.display = 'none'; // Básico não vê o botão
+    }
+
+    // Configurar o comportamento do Modal ao abrir
+    configurarModalNovaNC();
+    configurarModalNovaAC();
 };
+
+function configurarModalNovaNC() {
+    var modal = document.getElementById('modalNovaNC');
+    var selectArea = document.getElementById('ncArea');
+    var selectResp = document.getElementById('ncResponsavel');
+
+    if (!modal) return;
+
+    // Evento disparado sempre que o modal vai abrir
+    modal.addEventListener('show.bs.modal', function () {
+        var user = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
+        
+        // Resetar campos
+        document.getElementById('formNovaNC').reset();
+        document.getElementById('ncData').valueAsDate = new Date();
+
+        // LÓGICA DE PERMISSÕES
+        var isAdminOrQuality = (user.tipo === 'AdminWeb' || user.tipo === 'Gestão da Qualidade');
+
+        if (isAdminOrQuality) {
+            // ADMIN/QUALIDADE: Vê tudo, mexe em tudo
+            selectArea.disabled = false;
+            selectArea.value = ""; 
+            selectResp.innerHTML = '<option value="">Selecione a Área primeiro...</option>';
+
+            // Quando mudar a área, atualiza os responsáveis
+            selectArea.onchange = function() {
+                atualizarSelectResponsavelPorArea(this.value);
+            };
+
+        } else {
+            // OUTROS USERS: Área fixa e bloqueada
+            selectArea.value = user.departamento;
+            selectArea.disabled = true; // Bloqueia o campo visualmente
+
+            // Carrega imediatamente os responsáveis da área do user
+            atualizarSelectResponsavelPorArea(user.departamento);
+        }
+    });
+}
+
+function configurarModalNovaAC() {
+    var modalAC = document.getElementById('modalNovaAC');
+    
+    if (!modalAC) return;
+
+    modalAC.addEventListener('show.bs.modal', function () {
+        // 1. Descobrir qual é a NC associada
+        var ncId = document.getElementById('ac_ncId').value;
+        
+        // 2. Encontrar os dados dessa NC (para saber a Área)
+        var ncOrigem = ncs.find(n => n.id === ncId);
+
+        if (ncOrigem) {
+            console.log("A carregar responsáveis para a área: " + ncOrigem.area);
+            
+            // 3. Chamar a função de filtro enviando a Área da NC e o ID do select da AC
+            atualizarSelectResponsavelPorArea(ncOrigem.area, 'ac_responsavel');
+        } else {
+            console.error("Erro: Não foi possível encontrar a NC origem.");
+        }
+    });
+}
 
 function carregarStorage() {
     var dados_ncs = localStorage.getItem('ncs');
@@ -38,6 +115,40 @@ function guardarStorage() {
     localStorage.setItem('acs', JSON.stringify(acs));
     localStorage.setItem('contador', contador);
     localStorage.setItem('contadorAC', contadorAC);
+}
+
+// Adicionado funcao de filtro
+function atualizarSelectResponsavelPorArea(area, selectId) {
+    // Se não for passado ID, assume o da NC por defeito
+    var idDoCampo = selectId || 'ncResponsavel';
+    var select = document.getElementById(idDoCampo);
+    
+    if (!select) return; // Segurança caso o campo não exista
+
+    select.innerHTML = '<option value="">Selecione...</option>'; 
+
+    if (!area) return; 
+
+    var users = JSON.parse(localStorage.getItem('utilizadores')) || [];
+
+    // Filtra: Apenas Responsáveis de Área QUE pertençam à Área selecionada
+    var responsaveisFiltrados = users.filter(u => 
+        u.tipo === 'Responsável de Área' && u.departamento === area
+    );
+
+    if (responsaveisFiltrados.length === 0) {
+        var opt = document.createElement('option');
+        opt.text = "(Nenhum responsável encontrado nesta área)";
+        opt.disabled = true;
+        select.appendChild(opt);
+    } else {
+        responsaveisFiltrados.forEach(u => {
+            var opt = document.createElement('option');
+            opt.value = u.nome;
+            opt.text = u.nome;
+            select.appendChild(opt);
+        });
+    }
 }
 
 function mostrarNCs() {
@@ -70,23 +181,26 @@ function mostrarNCs() {
 }
 
 document.getElementById('btnGuardarNC').onclick = function () {
-    //ver perms
     var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
+    
+    // Como o campo pode estar disabled (bloqueado), temos de ir buscar o valor com cuidado
+    var selectArea = document.getElementById('ncArea');
+    var area = selectArea.value;
 
+    // Proteção extra para Básico
     if (utilizadorLogado.tipo === 'Utilizador Básico' && utilizadorLogado.departamento !== 'Qualidade') {
-        alert("Acesso Negado: Apenas o departamento de gestão/responsáveis de qualidade podem gerir Não Conformidades.");
-        return;
+         alert("Acesso Negado.");
+         return;
     }
 
     var titulo = document.getElementById('ncTitulo').value;
     var desc = document.getElementById('ncDescricao').value;
-    var area = document.getElementById('ncArea').value;
-    var resp = document.getElementById('ncResponsavel').value;
+    var resp = document.getElementById('ncResponsavel').value; 
     var prio = document.getElementById('ncPrioridade').value;
     var data = document.getElementById('ncData').value;
 
     if (!titulo || !desc || !area || !resp || !data) {
-        alert('Preencha todos os campos obrigatórios');
+        alert('Preencha todos os campos obrigatórios.');
         return;
     }
 
@@ -97,7 +211,7 @@ document.getElementById('btnGuardarNC').onclick = function () {
         descricao: desc,
         area: area,
         responsavel: resp,
-        responsavelId: utilizadorLogado.id,
+        responsavelId: utilizadorLogado.id, 
         prioridade: prio,
         data: data,
         estado: 'aberta',
@@ -109,21 +223,45 @@ document.getElementById('btnGuardarNC').onclick = function () {
     guardarStorage();
     mostrarNCs();
 
-    document.getElementById('formNovaNC').reset();
-    document.getElementById('ncData').valueAsDate = new Date();
-    bootstrap.Modal.getInstance(document.getElementById('modalNovaNC')).hide();
+    // Fechar modal
+    var modalEl = document.getElementById('modalNovaNC');
+    var modal = bootstrap.Modal.getInstance(modalEl);
+    modal.hide();
 };
 
 document.getElementById('btnGuardarAC').onclick = function () {
     console.log("Botão de Guardar Ação Corretiva clicado!");
     var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
 
+    // AC4.1 (1)
     if (utilizadorLogado.tipo === 'Utilizador Básico' && utilizadorLogado.departamento !== 'Qualidade') {
         alert("Acesso Negado: Apenas o departamento de gestão/responsáveis de qualidade podem gerir Ações Corretivas.");
         return;
     }
 
     var ncId = document.getElementById('ac_ncId').value;
+    
+    // AC4.1 (2)
+    var ncOrigem = ncs.find(n => n.id === ncId);
+
+    if (ncOrigem) {
+        // Regra 1: AdminWeb e Gestão da Qualidade têm acesso total
+        var temAcessoTotal = (utilizadorLogado.tipo === 'AdminWeb' || utilizadorLogado.tipo === 'Gestão da Qualidade');
+        
+        // Regra 2: Responsável de Área só tem acesso se a área coincidir
+        var temAcessoArea = (utilizadorLogado.tipo === 'Responsável de Área' && utilizadorLogado.departamento === ncOrigem.area);
+
+        // Se não tiver nem acesso total nem acesso à área, bloqueia
+        if (!temAcessoTotal && !temAcessoArea) {
+            alert("Acesso Negado: Apenas o Responsável da Área (" + ncOrigem.area + ") ou a Qualidade podem criar ações para esta NC.");
+            return;
+        }
+    } else {
+        alert("Erro: Não foi possível encontrar a Não Conformidade associada.");
+        return;
+    }
+    // ------------------------------------------
+
     var descricao = document.getElementById('ac_descricao').value;
     var responsavel = document.getElementById('ac_responsavel').value;
     var prazo = document.getElementById('ac_prazo').value;

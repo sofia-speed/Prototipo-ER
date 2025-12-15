@@ -19,8 +19,8 @@
                 <ul class="navbar-nav">
                     <li class="nav-item"><a class="nav-link" href="nao-conformidades.html">Não Conformidades</a></li>
                     <li class="nav-item"><a class="nav-link" href="nao-conformidades.html">Ações Corretivas</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="indicadores.html">Indicadores</a></li>
-                    <li class="nav-item"><a class="nav-link" href="oportunidades.html">Oportunidades</a></li>
+                    <li class="nav-item"><a class="nav-link" href="indicadores.html">Indicadores</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="oportunidades.html">Oportunidades</a></li>
                     <li class="nav-item"><a class="nav-link" href="utilizadores.html">Utilizadores</a></li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
@@ -119,35 +119,38 @@
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Prioridade</label>
+                                <label class="form-label">Prioridade *</label>
                                 <select class="form-select" id="omPrioridade" required>
+                                    <option value="">Selecione...</option>
                                     <option value="Baixa">Baixa</option>
-                                    <option value="Média" selected>Média</option>
+                                    <option value="Média">Média</option>
                                     <option value="Alta">Alta</option>
                                 </select>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Dificuldade Estimada</label>
-                                <select class="form-select" id="omDificuldade">
+                                <label class="form-label">Dificuldade Estimada *</label>
+                                <select class="form-select" id="omDificuldade" required>
+                                    <option value="">Selecione...</option>
                                     <option value="Fácil">Fácil</option>
-                                    <option value="Média" selected>Média</option>
+                                    <option value="Média">Média</option>
                                     <option value="Difícil">Difícil</option>
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Impacto Estimado</label>
                                 <select class="form-select" id="omImpacto">
+                                    <option value="">Por avaliar</option>
                                     <option value="Baixo">Baixo</option>
-                                    <option value="Médio" selected>Médio</option>
+                                    <option value="Médio">Médio</option>
                                     <option value="Alto">Alto</option>
                                 </select>
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Data e Hora de Registo *</label>
-                            <input type="datetime-local" class="form-control" id="omData" required>
+                            <label class="form-label">Data e Hora de Registo</label>
+                            <input type="datetime-local" class="form-control" id="omData">
                         </div>
                     </form>
                 </div>

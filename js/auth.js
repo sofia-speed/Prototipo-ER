@@ -99,7 +99,7 @@ function atualizarNavbar(utilizador) {
     
     if (userIcon && userIcon.parentElement) {
         const linkElement = userIcon.parentElement;
-        linkElement.innerHTML = `<i class="bi bi-person-circle"></i> ${utilizador.nome} <span class="badge bg-light text-dark ms-2">${utilizador.tipo}</span>`;
+        linkElement.innerHTML = `<i class="bi bi-person-circle"></i> ${utilizador.nome} <span class="badge bg-light text-dark ms-2">${utilizador.tipo} [${utilizador.departamento}]</span>`;
         
         const ul = linkElement.closest('ul');
         if (ul && !document.getElementById('btn-logout')) {
