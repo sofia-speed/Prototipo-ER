@@ -233,6 +233,7 @@ function desenharGauge(ind) {
             }]
         },
         options: {
+            maintainAspectRatio: false,
             cutout: '75%',
             rotation: -90,
             circumference: 180,

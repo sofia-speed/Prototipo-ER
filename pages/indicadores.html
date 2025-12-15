@@ -165,24 +165,42 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <strong>ID:</strong> <span id="detalheId"></span>
-                    <br><br>
-                    <strong>Nome:</strong>
-                    <p id="detalheNome"></p>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong>ID</strong>
+                            <p id="detalheId"></p>
+                        </div>
+                        <div class="col-md-8">
+                            <strong>Nome</strong>
+                            <p id="detalheNome"></p>
+                        </div>
+                    </div>
 
-                    <strong>Departamento:</strong>
-                    <p id="detalheDepartamento"></p>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong>Departamento</strong>
+                            <p id="detalheDepartamento"></p>
+                        </div>
+                        <div class="col-md-8">
+                            <strong>Meta</strong>
+                            <p id="detalheMeta"></p>
+                        </div>
+                    </div>
 
-                    <strong>Meta:</strong>
-                    <p id="detalheMeta"></p>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong>Valor Atual</strong>
+                            <p id="detalheValor"></p>
+                        </div>
+                    </div>
 
-                    <strong>Valor Atual:</strong>
-                    <p id="detalheValor"></p>
 
                     <hr>
                     <h6>Estado Atual do Indicador</h6>
 
-                    <canvas id="graficoEstado" height="200"></canvas>
+                    <div class="grafico-wrapper mx-auto text-center">
+                        <canvas id="graficoEstado"></canvas>
+                    </div>
 
                     <p id="textoEstado" class="text-center fw-bold mt-2"></p>
 

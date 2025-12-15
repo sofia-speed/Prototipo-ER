@@ -29,3 +29,9 @@ body {
     word-wrap: break-word;
     overflow-wrap: break-word;
 }
+
+.grafico-wrapper {
+    width: 500px;
+    height: 115px;
+    margin: 0 auto;
+}
