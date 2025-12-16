@@ -11,12 +11,11 @@ window.onload = function () {
     var dateControl = document.getElementById('ncData');
     if(dateControl) dateControl.valueAsDate = new Date();
 
-    // --- SEGURANÇA VISUAL (Botão Nova NC) ---
+    // --- SEGURANÇA VISUAL ---
     var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
     var btnNovaNC = document.querySelector('button[data-bs-target="#modalNovaNC"]');
     
     if (utilizadorLogado) {
-        // Se for Básico OU Auditor Interno, esconde o botão de criar NC
         if (utilizadorLogado.tipo === 'Utilizador Básico' || utilizadorLogado.tipo === 'Auditor Interno') {
             if(btnNovaNC) btnNovaNC.style.display = 'none';
         }
@@ -179,7 +178,7 @@ document.getElementById('btnGuardarNC').onclick = function () {
     var novaNC = {
         id: id, titulo: titulo, descricao: desc, area: area, responsavel: resp,
         responsavelId: utilizadorLogado.id, prioridade: prio, data: data, estado: 'aberta',
-        historico: [id + '- Aberta em ' + new Date().toLocaleDateString('pt-PT')]
+        historico: [id + ' : Aberta em ' + new Date().toLocaleDateString('pt-PT')]
     };
 
     ncs.push(novaNC);
@@ -225,7 +224,7 @@ document.getElementById('btnGuardarAC').onclick = function () {
         id: id, ncId: ncId, descricao: descricao, responsavel: responsavel,
         data_inicio: new Date().toLocaleDateString('pt-PT'), prazo: prazo, estado: estado,
         eficacia_auditada: eficaciaAuditada,
-        historico: [id + '- Criada em ' + new Date().toLocaleDateString('pt-PT')]
+        historico: [id + ' : Criada em ' + new Date().toLocaleDateString('pt-PT')]
     };
 
     acs.push(novaAC);
@@ -282,35 +281,42 @@ function verDetalhes(index) {
     if (acs_associadas.length > 0) {
         acs_associadas.forEach(ac => {
             var tr = document.createElement('tr');
-            
-            // Lógica para o botão de ação na tabela
             var botaoAcao = '-';
             
-            if (ac.estado === 'concluida') {
-                // Se estiver concluída, o Auditor (e admin/qualidade) pode auditar
-                if (utilizadorLogado.tipo === 'Auditor Interno' || utilizadorLogado.tipo === 'Gestão da Qualidade' || utilizadorLogado.tipo === 'Auditor Externo') {
-                    botaoAcao = '<button class="btn btn-sm btn-warning" onclick="auditarAC(\'' + ac.id + '\')">Auditar</button>';
-                }
-            } else if (ac.estado === 'em_execucao') {
-                // Se estiver em execução, só quem não é auditor pode concluir
-                if (utilizadorLogado.tipo !== 'Auditor Interno') {
+            // 1. ESTADO: EM EXECUÇÃO ou REABERTA
+            // Quem pode concluir: Admin, Qualidade, ou Responsável da Área
+            if (ac.estado === 'em_execucao' || ac.estado === 'reaberta') {
+                if (utilizadorLogado.tipo === 'AdminWeb' || 
+                    utilizadorLogado.tipo === 'Gestão da Qualidade' || 
+                    (utilizadorLogado.tipo === 'Responsável de Área' && utilizadorLogado.departamento === nc.area)) {
+                    
                     botaoAcao = '<button class="btn btn-sm btn-success" onclick="finalizarAC(\'' + ac.id + '\')">Concluir</button>';
-                }
-            } else if (ac.estado === 'aguardando_reabertura') {
-                // --- NOVO: Botão Reabrir ---
-                // Auditor NÃO vê este botão (ele já fez o trabalho dele). Admin/Qualidade veem.
-                if (utilizadorLogado.tipo === 'AdminWeb' || utilizadorLogado.tipo === 'Gestão da Qualidade') {
-                    botaoAcao = '<button class="btn btn-sm btn-danger" style="background-color: #6f42c1; border-color: #6f42c1;" onclick="reabrirAC(\'' + ac.id + '\')">Reabrir AC</button>';
                 } else {
-                    botaoAcao = '<span class="badge bg-danger">Ineficaz - Aguarda Reabertura</span>';
+                    botaoAcao = '<span class="text-muted">Em curso</span>';
+                }
+            } 
+            // 2. ESTADO: CONCLUÍDA
+            // Quem pode auditar: Auditores e Qualidade
+            // SÓ aparece se ainda não foi auditada (eficacia = pendente)
+            else if (ac.estado === 'concluida') {
+                if (ac.eficacia_auditada === 'pendente') {
+                    if (utilizadorLogado.tipo === 'Auditor Interno' || utilizadorLogado.tipo === 'Auditor Externo' || utilizadorLogado.tipo === 'Gestão da Qualidade') {
+                        botaoAcao = '<button class="btn btn-sm btn-warning" onclick="auditarAC(\'' + ac.id + '\')">Auditar</button>';
+                    } else {
+                        botaoAcao = '<span class="badge bg-success">Aguardando Auditoria</span>';
+                    }
+                } else {
+                    // Se já foi auditada e está Concluída, significa que foi Eficaz.
+                    // Não mostra botão nenhum, apenas o estado.
+                    botaoAcao = '<span class="badge bg-success"><i class="bi bi-check-circle"></i> Fechada (Eficaz)</span>';
                 }
             }
 
-            // Converter estado para texto legível na tabela
+            // Converter estado para texto legível
             var estadoTexto = ac.estado;
             if(ac.estado === 'em_execucao') estadoTexto = 'Em Execução';
+            if(ac.estado === 'reaberta') estadoTexto = 'Reaberta (Ineficaz)';
             if(ac.estado === 'concluida') estadoTexto = 'Concluída';
-            if(ac.estado === 'aguardando_reabertura') estadoTexto = 'Auditada (Ineficaz)';
 
             tr.innerHTML =
                 '<td><strong>' + ac.id + '</strong></td>' +
@@ -322,13 +328,13 @@ function verDetalhes(index) {
             tabelaAcoes.appendChild(tr);
         });
         
-        // Adiciona histórico das ACs ao histórico visual
+        // Histórico Visual
         acs_associadas.forEach(ac => {
             if (ac.historico && ac.historico.length > 0) {
                 ac.historico.forEach(h => {
                     var li = document.createElement('li');
                     li.className = 'list-group-item list-group-item-light';
-                    li.innerHTML = '<small><strong>AC ' + ac.id + ':</strong> ' + h + '</small>';
+                    li.innerHTML = '<small>' + h + '</small>'; // O h já traz o ID formatado
                     document.getElementById('detalheHistorico').appendChild(li);
                 });
             }
@@ -357,25 +363,45 @@ document.getElementById('btnAtualizarEstado').onclick = function () {
     if (!confirm("Confirmar alteração do estado?")) return;
     nc.estado = novoEstado;
     var texto = nc.estado == 'aberta' ? 'Aberta' : (nc.estado == 'analise' ? 'Em análise' : 'Encerrada');
-    nc.historico.push(nc.id + ' - ' + texto + ' em ' + new Date().toLocaleDateString('pt-PT'));
+    nc.historico.push(nc.id + ' : ' + texto + ' em ' + new Date().toLocaleDateString('pt-PT'));
     guardarStorage(); mostrarNCs(); bootstrapModal.hide();
 };
 
+// --- FUNÇÃO FINALIZAR (Atualizada com Permissões e Histórico) ---
 function finalizarAC(acId) {
     var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
-    if (utilizadorLogado.tipo !== 'Gestão da Qualidade' && utilizadorLogado.tipo !== 'AdminWeb') {
-        alert("Apenas a Gestão da Qualidade pode finalizar ações."); return;
+    var ac = acs.find(a => a.id === acId);
+    if (!ac) return;
+
+    // Buscar a NC Pai para verificar a área
+    var ncPai = ncs.find(n => n.id === ac.ncId);
+
+    // Permissões: Admin, Qualidade OU Responsável da Área Específica
+    var permitido = false;
+    if (utilizadorLogado.tipo === 'AdminWeb' || utilizadorLogado.tipo === 'Gestão da Qualidade') {
+        permitido = true;
+    } else if (utilizadorLogado.tipo === 'Responsável de Área' && ncPai && utilizadorLogado.departamento === ncPai.area) {
+        permitido = true;
     }
-    if (!confirm("Confirmar finalização?")) return;
-    var ac = acs.find(a => a.id === acId); if (!ac) return;
+
+    if (!permitido) {
+        alert("Apenas a Gestão da Qualidade ou o Responsável da Área (" + (ncPai ? ncPai.area : '?') + ") podem concluir esta ação.");
+        return;
+    }
+
+    if (!confirm("Confirmar finalização da Ação Corretiva?")) return;
+
     ac.estado = 'concluida'; 
-    ac.eficacia_auditada = 'pendente';
+    ac.eficacia_auditada = 'pendente'; // Fica pendente para o auditor ver
+
     if (!ac.historico) ac.historico = [];
-    ac.historico.push("Concluída em " + new Date().toLocaleDateString('pt-PT'));
-    guardarStorage(); if (ncSelecionada !== null) verDetalhes(ncSelecionada);
+    ac.historico.push(ac.id + " : Concluída por " + utilizadorLogado.nome + " em " + new Date().toLocaleDateString('pt-PT'));
+    
+    guardarStorage(); 
+    if (ncSelecionada !== null) verDetalhes(ncSelecionada);
 }
 
-// --- LÓGICA DE AUDITORIA ATUALIZADA ---
+// --- FUNÇÃO AUDITAR (Atualizada: Automática e Formatação) ---
 function auditarAC(acId) {
     var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
 
@@ -386,52 +412,33 @@ function auditarAC(acId) {
     var ac = acs.find(a => a.id === acId); if (!ac) return;
     if (ac.estado !== 'concluida') { alert("A ação ainda não está concluída."); return; }
     
-    var efic = prompt("Avaliação da eficácia (Eficaz / Ineficaz):"); if (!efic) return;
-    var coment = prompt("Comentário de auditoria:"); if (!coment) return;
+    var efic = prompt("Avaliação da eficácia (Eficaz / Ineficaz):"); 
+    if (!efic) return;
+    var coment = prompt("Comentário de auditoria:"); 
+    if (!coment) return;
 
-    ac.eficacia_auditada = efic; 
+    ac.eficacia_auditada = efic; // Guarda o valor
     ac.comentario_auditoria = coment;
     
     if (!ac.historico) ac.historico = [];
-    ac.historico.push("Auditada como " + efic + " | " + coment);
+    
+    // FORMATO DO HISTÓRICO: {id} : Auditada como {valor} | {mensagem}
+    var msgHistorico = ac.id + " : Auditada como " + efic + " | Comentário Auditoria: " + coment;
+    ac.historico.push(msgHistorico);
 
     if (efic.toLowerCase() === 'ineficaz') {
-        // MUDANÇA: Não volta logo para 'em_execucao' ou 'reaberta'. 
-        // Vai para um estado de espera, para que a gestão possa ver e clicar no botão "Reabrir".
-        ac.estado = 'aguardando_reabertura'; 
-        alert("Ação marcada como Ineficaz. O estado mudou para 'Aguardando Reabertura'. O gestor deverá reabrir a ação.");
+        // REABERTURA AUTOMÁTICA
+        ac.estado = 'reaberta'; 
+        ac.eficacia_auditada = 'pendente'; // Volta a pendente para permitir nova conclusão futura
+        
+        ac.historico.push(ac.id + " : Reaberta automaticamente após auditoria ineficaz.");
+        alert("Ação marcada como Ineficaz. Foi reaberta automaticamente para nova correção.");
+    } else {
+        alert("Auditoria registada. Ação encerrada com eficácia.");
     }
 
     guardarStorage(); 
     if (ncSelecionada !== null) verDetalhes(ncSelecionada);
-}
-
-// --- NOVA FUNÇÃO: REABRIR AC ---
-function reabrirAC(acId) {
-    var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
-
-    // Apenas Gestão ou Admin reabrem (Auditor não mexe nisto)
-    if (utilizadorLogado.tipo !== 'Gestão da Qualidade' && utilizadorLogado.tipo !== 'AdminWeb') {
-        alert("Apenas a Gestão da Qualidade pode reabrir ações."); return;
-    }
-
-    var justificacao = prompt("Motivo da reabertura / Instruções para correção:");
-    if (!justificacao) return;
-
-    var ac = acs.find(a => a.id === acId);
-    if (!ac) return;
-
-    // Volta o estado para execução
-    ac.estado = 'em_execucao';
-    // Reinicia a auditoria para pendente (pois vai ser trabalhada de novo)
-    ac.eficacia_auditada = 'pendente'; 
-    
-    if (!ac.historico) ac.historico = [];
-    ac.historico.push("REABERTA - Justificação: " + justificacao + " (" + new Date().toLocaleDateString('pt-PT') + ")");
-
-    guardarStorage();
-    if (ncSelecionada !== null) verDetalhes(ncSelecionada);
-    alert("Ação corretiva reaberta com sucesso. Voltou ao estado 'Em Execução'.");
 }
 
 document.getElementById('filtroEstado').onchange = mostrarNCs;
