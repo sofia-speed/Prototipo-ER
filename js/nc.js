@@ -9,15 +9,15 @@ window.onload = function () {
     mostrarNCs();
 
     var dateControl = document.getElementById('ncData');
-    if(dateControl) dateControl.valueAsDate = new Date();
+    if (dateControl) dateControl.valueAsDate = new Date();
 
     // --- SEGURANÇA VISUAL ---
     var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
     var btnNovaNC = document.querySelector('button[data-bs-target="#modalNovaNC"]');
-    
+
     if (utilizadorLogado) {
         if (utilizadorLogado.tipo === 'Utilizador Básico' || utilizadorLogado.tipo === 'Auditor Interno') {
-            if(btnNovaNC) btnNovaNC.style.display = 'none';
+            if (btnNovaNC) btnNovaNC.style.display = 'none';
         }
     }
 
@@ -41,9 +41,9 @@ function configurarModalNovaNC() {
 
         if (isAdminOrQuality) {
             selectArea.disabled = false;
-            selectArea.value = ""; 
+            selectArea.value = "";
             selectResp.innerHTML = '<option value="">Selecione a Área primeiro...</option>';
-            selectArea.onchange = function() {
+            selectArea.onchange = function () {
                 atualizarSelectResponsavelPorArea(this.value);
             };
         } else {
@@ -99,14 +99,14 @@ function guardarStorage() {
 function atualizarSelectResponsavelPorArea(area, selectId) {
     var idDoCampo = selectId || 'ncResponsavel';
     var select = document.getElementById(idDoCampo);
-    
-    if (!select) return; 
 
-    select.innerHTML = '<option value="">Selecione...</option>'; 
-    if (!area) return; 
+    if (!select) return;
+
+    select.innerHTML = '<option value="">Selecione...</option>';
+    if (!area) return;
 
     var users = JSON.parse(localStorage.getItem('utilizadores')) || [];
-    var responsaveisFiltrados = users.filter(u => 
+    var responsaveisFiltrados = users.filter(u =>
         u.tipo === 'Responsável de Área' && u.departamento === area
     );
 
@@ -161,12 +161,12 @@ document.getElementById('btnGuardarNC').onclick = function () {
 
     if (utilizadorLogado.tipo === 'Auditor Interno') { alert("Auditores não podem criar NCs."); return; }
     if (utilizadorLogado.tipo === 'Utilizador Básico' && utilizadorLogado.departamento !== 'Qualidade') {
-         alert("Acesso Negado."); return;
+        alert("Acesso Negado."); return;
     }
 
     var titulo = document.getElementById('ncTitulo').value;
     var desc = document.getElementById('ncDescricao').value;
-    var resp = document.getElementById('ncResponsavel').value; 
+    var resp = document.getElementById('ncResponsavel').value;
     var prio = document.getElementById('ncPrioridade').value;
     var data = document.getElementById('ncData').value;
 
@@ -264,13 +264,13 @@ function verDetalhes(index) {
     var selectEstado = document.getElementById('detalheEstado');
 
     if (utilizadorLogado.tipo === 'Auditor Interno') {
-        if(btnAtualizarEstado) btnAtualizarEstado.style.display = 'none';
-        if(btnCriarAC) btnCriarAC.style.display = 'none';
-        if(selectEstado) selectEstado.disabled = true;
+        if (btnAtualizarEstado) btnAtualizarEstado.style.display = 'none';
+        if (btnCriarAC) btnCriarAC.style.display = 'none';
+        if (selectEstado) selectEstado.disabled = true;
     } else {
-        if(btnAtualizarEstado) btnAtualizarEstado.style.display = 'block';
-        if(btnCriarAC) btnCriarAC.style.display = 'block';
-        if(selectEstado) selectEstado.disabled = false;
+        if (btnAtualizarEstado) btnAtualizarEstado.style.display = 'block';
+        if (btnCriarAC) btnCriarAC.style.display = 'block';
+        if (selectEstado) selectEstado.disabled = false;
     }
 
     var tabelaAcoes = document.getElementById('tabelaAcoes');
@@ -282,19 +282,19 @@ function verDetalhes(index) {
         acs_associadas.forEach(ac => {
             var tr = document.createElement('tr');
             var botaoAcao = '-';
-            
+
             // 1. ESTADO: EM EXECUÇÃO ou REABERTA
             // Quem pode concluir: Admin, Qualidade, ou Responsável da Área
             if (ac.estado === 'em_execucao' || ac.estado === 'reaberta') {
-                if (utilizadorLogado.tipo === 'AdminWeb' || 
-                    utilizadorLogado.tipo === 'Gestão da Qualidade' || 
+                if (utilizadorLogado.tipo === 'AdminWeb' ||
+                    utilizadorLogado.tipo === 'Gestão da Qualidade' ||
                     (utilizadorLogado.tipo === 'Responsável de Área' && utilizadorLogado.departamento === nc.area)) {
-                    
+
                     botaoAcao = '<button class="btn btn-sm btn-success" onclick="finalizarAC(\'' + ac.id + '\')">Concluir</button>';
                 } else {
                     botaoAcao = '<span class="text-muted">Em curso</span>';
                 }
-            } 
+            }
             // 2. ESTADO: CONCLUÍDA
             // Quem pode auditar: Auditores e Qualidade
             // SÓ aparece se ainda não foi auditada (eficacia = pendente)
@@ -314,9 +314,9 @@ function verDetalhes(index) {
 
             // Converter estado para texto legível
             var estadoTexto = ac.estado;
-            if(ac.estado === 'em_execucao') estadoTexto = 'Em Execução';
-            if(ac.estado === 'reaberta') estadoTexto = 'Reaberta (Ineficaz)';
-            if(ac.estado === 'concluida') estadoTexto = 'Concluída';
+            if (ac.estado === 'em_execucao') estadoTexto = 'Em Execução';
+            if (ac.estado === 'reaberta') estadoTexto = 'Reaberta (Ineficaz)';
+            if (ac.estado === 'concluida') estadoTexto = 'Concluída';
 
             tr.innerHTML =
                 '<td><strong>' + ac.id + '</strong></td>' +
@@ -327,7 +327,7 @@ function verDetalhes(index) {
                 '<td>' + botaoAcao + '</td>';
             tabelaAcoes.appendChild(tr);
         });
-        
+
         // Histórico Visual
         acs_associadas.forEach(ac => {
             if (ac.historico && ac.historico.length > 0) {
@@ -352,7 +352,7 @@ function verDetalhes(index) {
 
 document.getElementById('btnAtualizarEstado').onclick = function () {
     var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
-    if (utilizadorLogado.tipo === 'Auditor Interno') return; 
+    if (utilizadorLogado.tipo === 'Auditor Interno') return;
 
     var modal = document.getElementById("modalDetalhesNC");
     var bootstrapModal = bootstrap.Modal.getInstance(modal);
@@ -391,13 +391,13 @@ function finalizarAC(acId) {
 
     if (!confirm("Confirmar finalização da Ação Corretiva?")) return;
 
-    ac.estado = 'concluida'; 
+    ac.estado = 'concluida';
     ac.eficacia_auditada = 'pendente'; // Fica pendente para o auditor ver
 
     if (!ac.historico) ac.historico = [];
     ac.historico.push(ac.id + " : Concluída por " + utilizadorLogado.nome + " em " + new Date().toLocaleDateString('pt-PT'));
-    
-    guardarStorage(); 
+
+    guardarStorage();
     if (ncSelecionada !== null) verDetalhes(ncSelecionada);
 }
 
@@ -411,33 +411,56 @@ function auditarAC(acId) {
 
     var ac = acs.find(a => a.id === acId); if (!ac) return;
     if (ac.estado !== 'concluida') { alert("A ação ainda não está concluída."); return; }
-    
-    var efic = prompt("Avaliação da eficácia (Eficaz / Ineficaz):"); 
-    if (!efic) return;
-    var coment = prompt("Comentário de auditoria:"); 
+
+    var efic = null;
+
+    while (true) {
+        efic = prompt("Avaliação da eficácia (Eficaz ou Ineficaz):");
+
+        // Cancelar auditoria
+        if (efic === null) {
+            alert("Auditoria cancelada.");
+            return;
+        }
+
+        // Normalizar (ignora maiúsculas/minúsculas e espaços)
+        efic = efic.trim().toLowerCase();
+
+        // Validação correta
+        if (efic === 'eficaz' || efic === 'ineficaz') {
+            break; // sai do loop
+        }
+
+        alert("Valor inválido.\nEscreva apenas 'Eficaz' ou 'Ineficaz'.");
+    }
+
+    // Formatar para guardar
+    efic = efic.charAt(0).toUpperCase() + efic.slice(1);
+
+    var coment = prompt("Comentário de auditoria:");
     if (!coment) return;
 
     ac.eficacia_auditada = efic; // Guarda o valor
     ac.comentario_auditoria = coment;
-    
+
     if (!ac.historico) ac.historico = [];
-    
+
     // FORMATO DO HISTÓRICO: {id} : Auditada como {valor} | {mensagem}
     var msgHistorico = ac.id + " : Auditada como " + efic + " | Comentário Auditoria: " + coment;
     ac.historico.push(msgHistorico);
 
     if (efic.toLowerCase() === 'ineficaz') {
         // REABERTURA AUTOMÁTICA
-        ac.estado = 'reaberta'; 
+        ac.estado = 'reaberta';
         ac.eficacia_auditada = 'pendente'; // Volta a pendente para permitir nova conclusão futura
-        
+
         ac.historico.push(ac.id + " : Reaberta automaticamente após auditoria ineficaz.");
         alert("Ação marcada como Ineficaz. Foi reaberta automaticamente para nova correção.");
     } else {
         alert("Auditoria registada. Ação encerrada com eficácia.");
     }
 
-    guardarStorage(); 
+    guardarStorage();
     if (ncSelecionada !== null) verDetalhes(ncSelecionada);
 }
 
