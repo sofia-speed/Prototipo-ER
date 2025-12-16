@@ -35,3 +35,17 @@ body {
     height: 115px;
     margin: 0 auto;
 }
+
+table td, table th, p {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+}
+
+.table td:nth-child(2),
+.table th:nth-child(2) {
+    max-width: 250px;   /* ajusta aqui */
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+}
