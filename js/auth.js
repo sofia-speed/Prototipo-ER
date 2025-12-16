@@ -1,5 +1,5 @@
 //Versões do JS (mudar para atualizar ou apagar dados)
-const VERSAO_DADOS = 'v5_final'; 
+const VERSAO_DADOS = 'v7_final'; 
 
 //Vefiricar de imediato
 (function iniciarSeguranca() {
@@ -30,7 +30,10 @@ function garantirUtilizadores() {
             { id: 'USR0011', nome: 'Rodrigo Ferreira', email: 'it@empresa.pt', departamento: 'TI', tipo: 'Utilizador Básico' },
             
             // TI Responsavel
-            { id: 'USR0012', nome: 'João Silva', email: 'joaosilva@empresa.pt', departamento: 'TI', tipo: 'Responsável de Área' }
+            { id: 'USR0012', nome: 'João Silva', email: 'joaosilva@empresa.pt', departamento: 'TI', tipo: 'Responsável de Área' },
+
+            // Auditor Interno
+            { id: 'USR0012', nome: 'António Fernandes', email: 'auditoria@empresa.pt', departamento: 'Auditoria', tipo: 'Auditor Interno' }
         ];
 
         localStorage.setItem('utilizadores', JSON.stringify(usersDefault));
@@ -42,11 +45,9 @@ function garantirUtilizadores() {
     }
 }
 
-//berificar Sessao e permissoes
 function verificarAutenticacao() {
     if (window.location.pathname.includes('login.html')) return;
 
-    // MUDANÇA: Chave agora é 'utilizadorLogado' (PT-PT)
     const utilizadorStr = sessionStorage.getItem('utilizadorLogado');
 
     if (!utilizadorStr) {
@@ -62,18 +63,30 @@ function verificarAutenticacao() {
         atualizarNavbar(utilizador);
     }
 
-    // Regra de Segurança TI (Página Utilizadores)
-    if (window.location.pathname.includes('utilizadores.html')) {
-        if (utilizador.departamento !== 'TI') {
+    // --- REGRAS DE BLOQUEIO DE PÁGINAS ---
+
+    // 1. Regra para AUDITOR INTERNO (Apenas vê NCs)
+    if (utilizador.tipo === 'Auditor Interno') {
+        // Se NÃO estiver na página de NCs (e não for login), bloqueia
+        if (!window.location.pathname.includes('nao-conformidades.html')) {
             document.documentElement.innerHTML = ""; 
-            mostrarErroAcesso();
-            throw new Error("Acesso negado: Departamento " + utilizador.departamento + " não autorizado.");
+            mostrarErroAcesso("Acesso Restrito", "Auditores Internos apenas têm acesso à gestão de Não Conformidades.");
+            throw new Error("Acesso negado para Auditor.");
+        }
+    }
+
+    // 2. Regra para TI (Apenas vê Utilizadores - Exemplo antigo mantido)
+    if (window.location.pathname.includes('utilizadores.html')) {
+        // Se for TI, OK. Se for AdminWeb, OK. O resto bloqueia.
+        if (utilizador.departamento !== 'TI' && utilizador.tipo !== 'AdminWeb') {
+            document.documentElement.innerHTML = ""; 
+            mostrarErroAcesso("Acesso Negado", "Esta página é reservada à administração de utilizadores.");
+            throw new Error("Acesso negado.");
         }
     }
 }
 
-//Ecraa de acesso negado
-function mostrarErroAcesso() {
+function mostrarErroAcesso(titulo, mensagem) {
     document.body.innerHTML = `
         <head>
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -82,11 +95,12 @@ function mostrarErroAcesso() {
             <div class="d-flex align-items-center justify-content-center vh-100">
                 <div class="text-center">
                     <h1 class="display-1 fw-bold text-danger">403</h1>
-                    <p class="fs-3"> <span class="text-danger">Acesso Bloqueado!</span></p>
-                    <p class="lead">Esta página é exclusiva do departamento de TI.</p>
+                    <p class="fs-3"> <span class="text-danger">${titulo}</span></p>
+                    <p class="lead">${mensagem}</p>
                     <hr>
-                    <a href="nao-conformidades.html" class="btn btn-primary">Voltar ao Início</a>
-                    <a href="login.html" class="btn btn-outline-danger ms-2" onclick="logout()">Sair</a>
+                    <a href="login.html" class="btn btn-outline-danger" onclick="logout()">Sair</a>
+                    
+                    <a href="nao-conformidades.html" class="btn btn-primary ms-2">Voltar ao Início</a>
                 </div>
             </div>
         </body>
@@ -117,23 +131,27 @@ function temPermissaoDeVisualizar(areaDoItem) {
     if (!utilizador) return false;
 
     if (utilizador.tipo === 'AdminWeb' || utilizador.tipo === 'Gestão da Qualidade') return true;
+    
+    // O Auditor Interno vê TUDO nas NCs (para poder auditar qualquer área)
+    if (utilizador.tipo === 'Auditor Interno') return true;
+
     if (utilizador.tipo === 'Responsável de Área') return utilizador.departamento === areaDoItem;
     if (utilizador.departamento === 'TI') return true;
+    if (utilizador.tipo === 'Utilizador Básico') return utilizador.departamento === areaDoItem;
 
     return true; 
 }
 
 function login(email, password) {
     if (!localStorage.getItem('utilizadores')) garantirUtilizadores();
-    
     const users = JSON.parse(localStorage.getItem('utilizadores'));
     const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
 
-    if (user && password === "123") { // Password fixa
+    if (user && password === "123") {
         sessionStorage.setItem('utilizadorLogado', JSON.stringify(user));
         return { success: true };
     } else {
-        return { success: false, message: 'Email incorreto ou password inválida.' };
+        return { success: false, message: 'Dados inválidos.' };
     }
 }
 
