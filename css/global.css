@@ -44,7 +44,7 @@ table td, table th, p {
 
 .table td:nth-child(2),
 .table th:nth-child(2) {
-    max-width: 250px;   /* ajusta aqui */
+    max-width: 250px;
     word-break: break-word;
     overflow-wrap: break-word;
     white-space: normal;

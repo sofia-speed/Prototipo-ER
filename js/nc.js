@@ -25,6 +25,10 @@ window.onload = function () {
     configurarModalNovaAC();
 };
 
+function hojeISO() {
+    return new Date().toISOString().split('T')[0];
+}
+
 function configurarModalNovaNC() {
     var modal = document.getElementById('modalNovaNC');
     var selectArea = document.getElementById('ncArea');
@@ -52,6 +56,14 @@ function configurarModalNovaNC() {
             atualizarSelectResponsavelPorArea(user.departamento);
         }
     });
+
+    modal.addEventListener('show.bs.modal', function () {
+        var hoje = hojeISO();
+        var campoData = document.getElementById('ncData');
+
+        campoData.value = hoje;
+        campoData.min = hoje;
+    });
 }
 
 function configurarModalNovaAC() {
@@ -64,6 +76,14 @@ function configurarModalNovaAC() {
         if (ncOrigem) {
             atualizarSelectResponsavelPorArea(ncOrigem.area, 'ac_responsavel');
         }
+    });
+
+    modalAC.addEventListener('show.bs.modal', function () {
+        var hoje = hojeISO();
+        var campoPrazo = document.getElementById('ac_prazo');
+
+        campoPrazo.value = hoje;
+        campoPrazo.min = hoje;
     });
 }
 

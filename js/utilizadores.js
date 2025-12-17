@@ -111,7 +111,7 @@ document.getElementById('btnGuardarUtilizador').onclick = function () {
 
     var nome = document.getElementById('userNome').value;
     var email = document.getElementById('userEmail').value;
-    var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    var emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email)) {
         alert("Email inválido.");
         return;

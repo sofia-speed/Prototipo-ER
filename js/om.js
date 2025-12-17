@@ -1,4 +1,4 @@
-var oms = []; 
+var oms = [];
 var contadorOM = 1;
 var omSelecionada = null;
 
@@ -6,10 +6,14 @@ window.onload = function () {
     carregarStorage();
     mostrarOMs();
     configurarModalNovaOM();
-    
+
     var now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-    document.getElementById('omData').value = now.toISOString().slice(0, 16);
+    var agoraISO = now.toISOString().slice(0, 16);
+
+    var campoData = document.getElementById('omData');
+    campoData.value = agoraISO;
+    campoData.min = agoraISO;
 };
 
 function carregarStorage() {
@@ -20,7 +24,7 @@ function carregarStorage() {
         if (cont) contadorOM = parseInt(cont);
     } else {
         oms = [];
-        contadorOM = 1; 
+        contadorOM = 1;
     }
     guardarStorage();
 }
@@ -31,32 +35,32 @@ function guardarStorage() {
 }
 
 function formatarDataHora(dataString) {
-    if(!dataString) return "";
+    if (!dataString) return "";
     var d = new Date(dataString);
-    if(isNaN(d.getTime())) return dataString; 
-    return d.toLocaleDateString('pt-PT') + ' ' + d.toLocaleTimeString('pt-PT', {hour: '2-digit', minute:'2-digit'});
+    if (isNaN(d.getTime())) return dataString;
+    return d.toLocaleDateString('pt-PT') + ' ' + d.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
 }
 
 function mostrarOMs() {
     var tbody = document.getElementById("tabelaOMs");
-    tbody.innerHTML = ''; 
+    tbody.innerHTML = '';
 
     var filtroEstado = document.getElementById("filtroEstado").value;
     var filtroPesquisa = document.getElementById("filtroPesquisa").value.toLowerCase();
 
     for (var i = 0; i < oms.length; i++) {
         var om = oms[i];
-        
+
         if (!temPermissaoDeVisualizar(om.area)) continue;
 
-        if (filtroEstado && om.estado != filtroEstado) continue; 
-        if (filtroPesquisa && !om.titulo.toLowerCase().includes(filtroPesquisa)) continue; 
+        if (filtroEstado && om.estado != filtroEstado) continue;
+        if (filtroPesquisa && !om.titulo.toLowerCase().includes(filtroPesquisa)) continue;
 
-        var tr = document.createElement('tr'); 
+        var tr = document.createElement('tr');
         var corEstado;
         var textoEstado;
 
-        switch(om.estado) {
+        switch (om.estado) {
             case 'proposta': corEstado = 'secondary'; textoEstado = 'Proposta'; break;
             case 'avaliacao': corEstado = 'warning'; textoEstado = 'Em Avaliação'; break;
             case 'implementacao': corEstado = 'primary'; textoEstado = 'Em Implementação'; break;
@@ -80,7 +84,7 @@ function mostrarOMs() {
 document.getElementById('btnGuardarOM').onclick = function () {
     // --- VERIFICAÇÃO DE PERMISSÕES ---
     var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
-    
+
     if (utilizadorLogado.tipo === 'Utilizador Básico' && utilizadorLogado.departamento !== 'Qualidade') {
         alert("Acesso Negado: Apenas o departamento de gestão/responsáveis podem gerir Oportunidades.");
         return;
@@ -91,17 +95,17 @@ document.getElementById('btnGuardarOM').onclick = function () {
     var desc = document.getElementById('omDescricao').value;
     var area = document.getElementById('omArea').value;
     var prio = document.getElementById('omPrioridade').value;
-    var dific = document.getElementById('omDificuldade').value; 
-    var impac = document.getElementById('omImpacto').value;     
-    var data = document.getElementById('omData').value; 
+    var dific = document.getElementById('omDificuldade').value;
+    var impac = document.getElementById('omImpacto').value;
+    var data = document.getElementById('omData').value;
 
-    if (!titulo || !desc || !area || !prio || !data) {  
+    if (!titulo || !desc || !area || !prio || !data) {
         alert('Preencha todos os campos obrigatórios');
         return;
     }
 
     var id = 'OM' + ('000' + contadorOM).slice(-4);
-    var dataAgora = new Date().toLocaleString('pt-PT', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
+    var dataAgora = new Date().toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
     var novaOM = {
         id: id,
@@ -111,8 +115,8 @@ document.getElementById('btnGuardarOM').onclick = function () {
         prioridade: prio,
         dificuldade: dific,
         impacto: impac,
-        data: data, 
-        estado: 'proposta', 
+        data: data,
+        estado: 'proposta',
         historico: ['Proposta criada em ' + dataAgora]
     };
 
@@ -125,7 +129,7 @@ document.getElementById('btnGuardarOM').onclick = function () {
     var now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     document.getElementById('omData').value = now.toISOString().slice(0, 16);
-    
+
     bootstrap.Modal.getInstance(document.getElementById('modalNovaOM')).hide();
 };
 
@@ -138,8 +142,8 @@ function verDetalhes(index) {
     document.getElementById('detalheDescricao').textContent = om.descricao;
     document.getElementById('detalheArea').textContent = om.area;
     document.getElementById('detalhePrioridade').textContent = om.prioridade;
-    document.getElementById('detalheDificuldade').textContent = om.dificuldade; 
-    document.getElementById('detalheImpacto').textContent = om.impacto;         
+    document.getElementById('detalheDificuldade').textContent = om.dificuldade;
+    document.getElementById('detalheImpacto').textContent = om.impacto;
     document.getElementById('detalheData').textContent = formatarDataHora(om.data);
     document.getElementById('detalheEstado').value = om.estado;
 
@@ -181,14 +185,18 @@ function configurarModalNovaOM() {
         // voltar a colocar a data atual
         var now = new Date();
         now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        document.getElementById('omData').value = now.toISOString().slice(0, 16);
+        var agoraISO = now.toISOString().slice(0, 16);
+
+        var campoData = document.getElementById('omData');
+        campoData.value = agoraISO;
+        campoData.min = agoraISO;
     });
 }
 
 document.getElementById('btnAtualizarEstado').onclick = function () {
     // --- VERIFICAÇÃO DE PERMISSÕES ---
     var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
-    
+
     if (utilizadorLogado.tipo === 'Utilizador Básico' && utilizadorLogado.departamento !== 'Qualidade') {
         alert("Acesso Negado: Apenas o departamento de gestão/responsáveis de qualidade podem gerir Oportunidades.");
         return;
@@ -204,19 +212,19 @@ document.getElementById('btnAtualizarEstado').onclick = function () {
 
     om.estado = novoEstado;
     var textoEstado;
-    switch(novoEstado) {
+    switch (novoEstado) {
         case 'proposta': textoEstado = 'Proposta'; break;
         case 'avaliacao': textoEstado = 'Em Avaliação'; break;
         case 'implementacao': textoEstado = 'Em Implementação'; break;
         case 'concluida': textoEstado = 'Concluída'; break;
     }
 
-    var dataAgora = new Date().toLocaleString('pt-PT', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
+    var dataAgora = new Date().toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     om.historico.push('Estado alterado para ' + textoEstado + ' em ' + dataAgora);
 
     guardarStorage();
     mostrarOMs();
-    
+
     alert('O estado da oportunidade foi atualizado com sucesso');
     bootstrap.Modal.getInstance(document.getElementById('modalDetalhesOM')).hide();
 };
