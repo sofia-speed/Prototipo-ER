@@ -1,5 +1,5 @@
 //Versões do JS (mudar para atualizar ou apagar dados)
-const VERSAO_DADOS = 'v7_final'; 
+const VERSAO_DADOS = 'v8_final'; 
 
 //Vefiricar de imediato
 (function iniciarSeguranca() {
@@ -19,21 +19,21 @@ function garantirUtilizadores() {
             { id: 'USR0001', nome: 'SystemWebAdmin', email: 'SystemWebAdmin@empresa.pt', departamento: 'TI', tipo: 'AdminWeb' },
             
             // Qualidade 
-            { id: 'USR0007', nome: 'Inês Silva', email: 'qualidade@empresa.pt', departamento: 'Qualidade', tipo: 'Gestão da Qualidade' },
+            { id: 'USR0002', nome: 'Inês Silva', email: 'qualidade@empresa.pt', departamento: 'Qualidade', tipo: 'Gestão da Qualidade' },
             
             // Responsaveis de Área
-            { id: 'USR0008', nome: 'João Silva', email: 'producao@empresa.pt', departamento: 'Produção', tipo: 'Responsável de Área' },
-            { id: 'USR0009', nome: 'Carlos Andrade', email: 'logistica@empresa.pt', departamento: 'Logística', tipo: 'Responsável de Área' },
-            { id: 'USR0010', nome: 'Zé Manel', email: 'comercial@empresa.pt', departamento: 'Comercial', tipo: 'Responsável de Área' },
+            { id: 'USR0003', nome: 'João Silva', email: 'producao@empresa.pt', departamento: 'Produção', tipo: 'Responsável de Área' },
+            { id: 'USR0004', nome: 'Carlos Andrade', email: 'logistica@empresa.pt', departamento: 'Logística', tipo: 'Responsável de Área' },
+            { id: 'USR0005', nome: 'Zé Manel', email: 'comercial@empresa.pt', departamento: 'Comercial', tipo: 'Responsável de Área' },
+            { id: 'USR0006', nome: 'João Perestrelo', email: 'it@empresa.pt', departamento: 'TI', tipo: 'Responsável de Área' },
             
-            // TI Basico
-            { id: 'USR0011', nome: 'Rodrigo Ferreira', email: 'it@empresa.pt', departamento: 'TI', tipo: 'Utilizador Básico' },
-            
-            // TI Responsavel
-            { id: 'USR0012', nome: 'João Silva', email: 'joaosilva@empresa.pt', departamento: 'TI', tipo: 'Responsável de Área' },
+            //Users Basicos
+            { id: 'USR0007', nome: 'Rodrigo Ferreira', email: 'itbasic@empresa.pt', departamento: 'TI', tipo: 'Utilizador Básico' },
+            { id: 'USR0008', nome: 'Zé Manel', email: 'logisticabasic@empresa.pt', departamento: 'Logística', tipo: 'Utilizador Básico' },
+            { id: 'USR0009', nome: 'Paulo Cardoso', email: 'producaobasic@empresa.pt', departamento: 'Produção', tipo: 'Utilizador Básico' },
 
             // Auditor Interno
-            { id: 'USR0012', nome: 'António Fernandes', email: 'auditoria@empresa.pt', departamento: 'Auditoria', tipo: 'Auditor Interno' }
+            { id: 'USR0010', nome: 'António Fernandes', email: 'auditoria@empresa.pt', departamento: 'Auditoria', tipo: 'Auditor Interno' }
         ];
 
         localStorage.setItem('utilizadores', JSON.stringify(usersDefault));

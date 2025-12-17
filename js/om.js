@@ -82,7 +82,7 @@ document.getElementById('btnGuardarOM').onclick = function () {
     var utilizadorLogado = JSON.parse(sessionStorage.getItem('utilizadorLogado'));
     
     if (utilizadorLogado.tipo === 'Utilizador Básico' && utilizadorLogado.departamento !== 'Qualidade') {
-        alert("Acesso Negado: Apenas o departamento de gestão/responsáveis de qualidade podem gerir Oportunidades.");
+        alert("Acesso Negado: Apenas o departamento de gestão/responsáveis podem gerir Oportunidades.");
         return;
     }
     // ---------------------------------
